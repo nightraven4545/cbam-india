@@ -2,7 +2,7 @@
 
 **Which Indian steelmakers lose as Europe prices carbon, and what should they do about it?**
 
-An interactive scenario model of the EU Carbon Border Adjustment Mechanism (definitive regime since 1 Jan 2026) for Indian **steel** (JSW, Tata Steel, AM/NS India, JSPL, SAIL) and **aluminium** (Vedanta, Hindalco, NALCO) exporters. It covers:
+An interactive scenario model of the EU Carbon Border Adjustment Mechanism (definitive regime since 1 Jan 2026) for Indian **steel** (JSW, Tata Steel, AM/NS India, JSPL, SAIL) and **aluminium** (Vedanta, Hindalco, NALCO) exporters, with **cement** (UltraTech, Shree, Dalmia) as a contrast case. It covers:
 
 - **Cost bridge**: embedded emissions → benchmark × CBAM factor → certificates → € cost → pass-through → EBITDA.
 - **Value of verification**: EU default values (+10/20/30% mark-up) vs verified actual emissions.
@@ -12,13 +12,17 @@ An interactive scenario model of the EU Carbon Border Adjustment Mechanism (defi
 - **Delivered-cost crossover**: India vs Türkiye, Korea, China and EU mills; the carbon price at which India loses.
 - **Indirect-emissions stress test**: what happens if electricity emissions come into scope (the aluminium tail risk).
 - **Custom producer, shareable scenario links and CSV export.**
+- **Trade-allocation optimiser**: which plants should serve the EU under the quota.
+- **H₂-DRI real option**: binomial lattice, value of waiting, and exercise thresholds.
+- **Policy & MSMEs page**: Article 9 simulator (explicit carbon price vs CCTS), downstream radar (UN Comtrade 2024 EU imports from India), and an MSME per-unit calculator.
+- **Executive deck** (`/deck`): 10 slides computed live; print to PDF.
 - **Decarbonisation lab**: NPV, IRR, payback and MAC for 7 levers, with a dedicated EU line, CCTS credit price and green premium.
 - **Analysis**, a **carbon-markets primer** (EU ETS, PAT/ESCerts, CCTS, CORSIA, VCM, net-zero maths, greenwashing) and a **methodology** page with confidence grades A–E.
 
 ## Run
 ```bash
 npm install
-npm test        # engine tests (reproduces Commission example & €277.60/t default cost)
+npm test        # 26 tests (incl. Commission example, €277.60/t default cost, optimiser vs brute force)
 npm run dev
 ```
 
@@ -27,6 +31,7 @@ npm run dev
 - `src/lib/data.ts`: producers, benchmarks, defaults and levers, each with a source and confidence grade.
 - `src/lib/model.ts`: scenario layer (producer summaries, trajectories, lever economics, tornado, crossover).
 - `src/lib/risk.ts`: seeded price-path Monte Carlo and exposure statistics.
+- `src/lib/policy.ts`: Article 9 and downstream maths. `src/lib/options.ts`: H₂ real option.
 - `src/components/Dashboard.tsx` + `Phase2Cards.tsx`: the interactive model; `src/app/{analysis,markets,methodology}`: written pages.
 
 Producer inputs are D-grade estimates. Replace them with verified installation data before relying on any number.

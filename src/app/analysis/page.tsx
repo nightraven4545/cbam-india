@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { PRODUCERS } from "@/lib/data";
-import { COMPETITORS } from "@/lib/data";
+import { COMPETITORS, DOWNSTREAM } from "@/lib/data";
+import { article9 } from "@/lib/policy";
+import { DEFAULT_H2, h2Option } from "@/lib/options";
+import { optimiseAllocation } from "@/lib/model";
 import { DEFAULT_SCENARIO as S, producerSummary, cumulativeExposure, trajectory, crossoverPrice, tornado } from "@/lib/model";
 import { DEFAULT_RISK, exposureStats, pricePaths } from "@/lib/risk";
 
@@ -22,11 +25,17 @@ export default function Analysis() {
   const [indiaV, indiaD] = COMPETITORS;
   const eu = COMPETITORS.find((c) => c.origin.startsWith("EU"))!, kr = COMPETITORS.find((c) => c.origin.startsWith("South Korea"))!;
   const xEUv = crossoverPrice(indiaV, eu, 2026, "law"), xEUd = crossoverPrice(indiaD, eu, 2026, "law"), xKR = crossoverPrice(indiaV, kr, 2026, "law");
+  const pol = (mech: "explicit" | "ccts") => article9(S, "steel", { price: 20, mechanism: mech, targetCut: 0.05, qualifying: 0.6 }).reduce((a, r) => a + r.retained, 0);
+  const dsUsd = (st: "inScope" | "proposed") => DOWNSTREAM.filter((d) => d.status === st).reduce((a, d) => a + d.usdM, 0) / 1000;
+  const h2 = h2Option(S, DEFAULT_H2), h2p = h2Option(S, { ...DEFAULT_H2, greenPremium: 150 });
+  const ex = (r: typeof h2) => r.thresholds.find((t) => t.price !== null);
+  const opt = optimiseAllocation(jsw, { ...S, year: 2030 }, { euCap: jsw.euVolume.value, euPremium: 100 });
+  const ultra = PRODUCERS.find((p) => p.id === "ultratech")!, ur = producerSummary(ultra, full);
   const al = PRODUCERS.filter((p) => p.sector === "aluminium").map((p) => ({ p, r: producerSummary(p, full), ri: producerSummary(p, { ...full, includeIndirect: true }), t: trajectory(p, full) }));
 
   return (
     <article className="prose-cbam max-w-3xl">
-      <p className="text-xs uppercase tracking-wider text-ink-3">Analysis · steel + aluminium · as of 31 Oct 2026</p>
+      <p className="text-xs uppercase tracking-wider text-ink-3">Analysis · steel, aluminium, cement · as of 31 Oct 2026</p>
       <h1 className="text-3xl font-semibold mt-2">CBAM and Indian steel: the problem, the numbers, the moves</h1>
 
       <h2>1. Governing thought</h2>
@@ -99,7 +108,37 @@ export default function Analysis() {
         <li>PFC and anode-effect control is the no-regret move: it cuts the emissions CBAM does price, pays back within about 2 years, and also saves power.</li>
       </ul>
 
-      <h2>7. Industry context</h2>
+      <h2>7. Policy, MSMEs, trade allocation, timing and cement (Phase 3)</h2>
+      <h3>Article 9: the design of India&apos;s carbon price decides where the money goes</h3>
+      <p>
+        If India levied an <strong>explicit €20/t carbon price</strong> on exported steel, and 60% of exports carried evidence the EU accepts, about <strong>{m(pol("explicit"))}</strong> of 2026–34 CBAM would be paid in India instead of to the EU budget.
+        Under <strong>CCTS as designed</strong>, an intensity scheme where only the slice above the target pays, the same €20 keeps only about {m(pol("ccts"))}.
+        The policy lever is the design, not the price level. The EU has not yet recognised any third-country price under Article 9.
+      </p>
+      <h3>MSMEs are already inside CBAM</h3>
+      <p>
+        Fasteners (7318), tubes (7304/7306), structures (7308) and other steel and aluminium articles (7326, 7610, 7616) are already Annex I goods. In 2024 the EU imported US${dsUsd("inScope").toFixed(1)}bn of them from India, much of it from MSME clusters in Ludhiana, Rajkot and Moradabad.
+        The 2028 downstream proposal (COM(2025) 989; Council and Parliament positions are wider) would add headings worth US${dsUsd("proposed").toFixed(1)}bn, mainly auto parts (8708), transmission parts (8483) and valves (8481), though only some 8-digit lines.
+        On default values, these goods carry several times the CBAM cost they would with their supplier&apos;s verified steel data. <strong>Large mills sharing verified data down the chain is the cheapest MSME support available.</strong>
+      </p>
+      <h3>Trade allocation</h3>
+      <p>
+        In 2030, with a €100/t EU price premium and 50% pass-through, routing JSW&apos;s EU tonnes to its lowest-carbon plant, rather than spreading them by capacity, is worth about <strong>{m(opt.valueOptimised - opt.valueProrata)}/yr</strong>.
+        When the premium no longer covers a plant&apos;s CBAM share, the right answer is to stop serving the EU from that plant.
+      </p>
+      <h3>When to build H₂-DRI</h3>
+      <p>
+        Built in 2026 for a dedicated EU line, H₂-DRI has an NPV of {eur(h2.npvNow)}/t of capacity. The option to build any year to 2034 is worth {eur(h2.optionValue)}/t,
+        and exercise is optimal only {ex(h2) ? <>from {ex(h2)!.year} if the certificate price exceeds {eur(ex(h2)!.price!)}</> : "after 2034"}. With a €150/t green premium the trigger moves to {ex(h2p) ? <>{ex(h2p)!.year} at {eur(ex(h2p)!.price!)}</> : "never"}.
+        The right move today is to stay H₂-ready (gas DRI shafts, sites, power), not to commit capital.
+      </p>
+      <h3>Cement as a contrast</h3>
+      <p>
+        India&apos;s cement default (1.48 t, plus the mark-up) costs about {eur(ur.def.net)}/t against about {eur(ur.act.net)}/t verified for OPC from an efficient kiln. Unlike steel and aluminium, cement CBAM includes electricity, so waste-heat recovery and renewables cut it directly.
+        India exports almost no cement to the EU, so this matters for methodology and for neighbouring markets, not for revenue.
+      </p>
+
+      <h2>8. Industry context</h2>
       <h3>Why steel first</h3>
       <ul>
         <li>About €4.4bn of the €5.3bn of CBAM-covered goods the EU imported from India in 2025 was iron and steel: 4.0 Mt, about 6.9% of extra-EU CBAM steel imports (Eurostat Comext, via cbamguide.com).</li>
@@ -122,7 +161,7 @@ export default function Analysis() {
         <strong>Cement:</strong> EU imports from India are under €1m. It matters as a contrast: indirect emissions are included, and clinker substitution (PPC, PSC, LC3) is the dominant lever. Indian blended cements are already among the world&apos;s lowest-clinker.
       </p>
 
-      <h2>8. What management should do (ranked)</h2>
+      <h2>9. What management should do (ranked)</h2>
       <ol>
         <li><strong>Now: install CBAM-grade MRV and get accredited verification for each EU-supplying installation.</strong> Report emissions per CN code with precursors (sinter, pig iron, DRI). This beats the defaults immediately.</li>
         <li><strong>Now: rewrite EU contracts.</strong> Use CBAM cost-sharing clauses indexed to the certificate price, a verified-intensity warranty, and quota-allocation commitments. Do not concede 100% pass-through by default.</li>
@@ -131,15 +170,16 @@ export default function Analysis() {
         <li><strong>2030+: commit to structural routes</strong> (gas or H₂-ready DRI-EAF, CCUS in clusters) as staged real options. Build H₂-ready shafts now and switch fuel when green H₂ falls below about US$2–2.5/kg.</li>
       </ol>
 
-      <h2>9. What India should do</h2>
+      <h2>10. What India should do</h2>
       <ul>
+        <li>Prefer an explicit, Article 9-creditable price on exported embedded carbon over a pure intensity scheme; see the Policy page simulator.</li>
         <li>Make CCTS produce an <em>effectively paid</em> carbon price, with documentation that qualifies for the Article 9 deduction, so revenue stays in India rather than going to the EU budget.</li>
         <li>Build national CBAM-grade MRV and verification capacity: accredited verifiers and a shared default-to-actual data service for MSMEs, which feel the downstream extension first.</li>
         <li>Align the Green Steel Taxonomy (below 2.2 tCO₂e/t finished steel, Scope 1+2+partial 3) with CBAM boundaries, or publish a reconciliation, so &quot;green&quot; claims hold up in both systems.</li>
         <li>Use India–EU FTA talks to secure recognition of CCTS and to phase the downstream extension.</li>
       </ul>
 
-      <h2>10. Risks and limits of this model</h2>
+      <h2>11. Risks and limits of this model</h2>
       <ul>
         <li>Producer EU volumes, prices, EBITDA and CBAM-boundary intensities are <strong>estimates (grade D)</strong>. Company BRSR intensities use corporate Scope 1+2 boundaries, not CBAM&apos;s installation and product boundary.</li>
         <li>One CN code (7208) stands in for each producer&apos;s whole product mix. Coated and cold-rolled products carry extra precursor emissions.</li>
@@ -147,7 +187,7 @@ export default function Analysis() {
         <li>Lever cost ranges are wide and India-specific (LNG, scrap and H₂ prices). Read the IRRs as directional.</li>
       </ul>
 
-      <h2>11. Cross-check of the AI-generated research inputs</h2>
+      <h2>12. Cross-check of the AI-generated research inputs</h2>
       <table>
         <thead><tr><th>Claim</th><th>Status</th></tr></thead>
         <tbody>

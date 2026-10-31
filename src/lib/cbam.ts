@@ -27,6 +27,7 @@ export function defaultMarkup(year: number): number {
 
 // Official quarterly CBAM certificate prices, €/tCO2e (European Commission, DG TAXUD).
 export const CERT_PRICES_2026 = { Q1: 75.36, Q2: 75.28, Q3: 82.32 } as const;
+// TODO: add Q4 2026 when the Commission publishes it (scheduled 4 Jan 2027); prices are weekly from 2027.
 
 export type Mode = "default" | "actual";
 

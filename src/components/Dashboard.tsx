@@ -7,6 +7,7 @@ import {
 import { PRODUCERS, LEVERS, PEER_DEFAULTS, PRODUCTS, benchmarkFor, type Producer, type Sector } from "@/lib/data";
 import { AXIS, Card, Grade, Slider, TIP, eur, inr, m, pct } from "./ui";
 import { CrossoverCard, RiskCard, TornadoCard } from "./Phase2Cards";
+import { H2OptionCard, OptimiserCard } from "./Phase3Cards";
 import { DEFAULT_SCENARIO, cumulativeExposure, leverEconomics, producerSummary, trajectory, type Scenario } from "@/lib/model";
 import { YEARS, cbamFactor, defaultMarkup } from "@/lib/cbam";
 
@@ -17,7 +18,7 @@ function customProducer(sector: Sector, c: { intensity: number; vol: number; ebi
   const g = (value: number) => ({ value, confidence: "D" as const, source: "User input" });
   return {
     id: CUSTOM_ID, name: "Custom producer", sector, route: "User-defined (primary route)", routeShares: [1, 0, 0],
-    production: g(Math.max(c.vol, 0.01) * 10), euVolume: g(c.vol), actualDirect: g(c.intensity), indirect: g(sector === "aluminium" ? 14 : 0.3),
+    production: g(Math.max(c.vol, 0.01) * 10), euVolume: g(c.vol), actualDirect: g(c.intensity), indirect: g(sector === "aluminium" ? 14 : sector === "cement" ? 0.05 : 0.3),
     ebitdaEUR: g(c.ebitda), note: "Your own inputs. Production is assumed at 10× EU volume for the lever maths.",
   };
 }
@@ -56,7 +57,7 @@ export default function Dashboard() {
       return n;
     });
     const sec = q.get("sector");
-    if (sec === "steel" || sec === "aluminium") setSector(sec);
+    if (sec === "steel" || sec === "aluminium" || sec === "cement") setSector(sec);
     if (q.get("p")) setPid(q.get("p")!);
     if (q.has("ci")) setCustom({ intensity: num("ci") ?? 2.3, vol: num("cv") ?? 0.2, ebitda: num("ce") ?? 90 });
   }, []);
@@ -114,20 +115,22 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
       <header className="space-y-3">
-        <p className="text-xs uppercase tracking-wider text-ink-3">EU CBAM · definitive regime since 1 Jan 2026 · steel + aluminium</p>
+        <p className="text-xs uppercase tracking-wider text-ink-3">EU CBAM · definitive regime since 1 Jan 2026 · steel · aluminium · cement</p>
         <h1 className="text-2xl sm:text-4xl font-semibold leading-tight max-w-3xl">Which Indian producers lose as Europe prices carbon, and what should they do about it?</h1>
         <p className="text-ink-2 max-w-3xl">
           The EU importer pays CBAM, but the Indian exporter bears it through lower prices. The cheapest lever is not a furnace: it is <strong className="text-ink">verified emissions data</strong>.
           {sector === "steel"
             ? <> Unverified steel is charged on India&apos;s default of {product.defaultValue.value} tCO₂/t plus a mark-up. Verified BF-BOF steel runs at about 2.0–2.6.</>
+            : sector === "cement"
+            ? <> Cement is the contrast case: India barely exports it to the EU, but it is the one sector here where <strong className="text-ink">electricity emissions are charged</strong>, so renewables and waste-heat recovery cut CBAM directly. OPC on defaults pays about €80/t, against about €15/t verified.</>
             : <> For aluminium, only anode and PFC emissions (about 1.7–1.8 t) are charged today, not the 14–15 t from captive coal power. Use the indirect-emissions stress test to see what happens if that changes.</>}
         </p>
       </header>
 
       <div className="grid gap-6 lg:grid-cols-[300px_1fr]">
         <aside className="space-y-4 rounded-xl border border-line bg-surface p-4 h-fit lg:sticky lg:top-20">
-          <div className="grid grid-cols-2 gap-1 rounded-lg bg-bg p-1 text-sm" role="tablist" aria-label="Sector">
-            {(["steel", "aluminium"] as const).map((sec) => (
+          <div className="grid grid-cols-3 gap-1 rounded-lg bg-bg p-1 text-sm" role="tablist" aria-label="Sector">
+            {(["steel", "aluminium", "cement"] as const).map((sec) => (
               <button key={sec} role="tab" aria-selected={sector === sec} onClick={() => switchSector(sec)}
                 className={`rounded-md py-1.5 capitalize ${sector === sec ? "bg-surface shadow-sm font-medium" : "text-ink-2"}`}>{sec}</button>
             ))}
@@ -140,9 +143,9 @@ export default function Dashboard() {
           </label>
           {p.id === CUSTOM_ID && (
             <div className="space-y-3 rounded-lg border border-line p-3">
-              <Slider label="Direct intensity (tCO₂/t)" value={custom.intensity} min={0.2} max={sector === "steel" ? 4 : 3} step={0.05} fmt={(v) => v.toFixed(2)} onChange={(v) => setCustom((c) => ({ ...c, intensity: v }))} />
+              <Slider label="Direct intensity (tCO₂/t)" value={custom.intensity} min={0.2} max={sector === "steel" ? 4 : sector === "cement" ? 1.5 : 3} step={0.05} fmt={(v) => v.toFixed(2)} onChange={(v) => setCustom((c) => ({ ...c, intensity: v }))} />
               <Slider label="EU volume (Mt/yr)" value={custom.vol} min={0.01} max={2} step={0.01} fmt={(v) => v.toFixed(2)} onChange={(v) => setCustom((c) => ({ ...c, vol: v }))} />
-              <Slider label="EBITDA on EU sales (€/t)" value={custom.ebitda} min={20} max={sector === "steel" ? 250 : 1500} step={5} fmt={(v) => eur(v)} onChange={(v) => setCustom((c) => ({ ...c, ebitda: v }))} />
+              <Slider label="EBITDA on EU sales (€/t)" value={custom.ebitda} min={20} max={sector === "steel" ? 250 : sector === "cement" ? 40 : 1500} step={5} fmt={(v) => eur(v)} onChange={(v) => setCustom((c) => ({ ...c, ebitda: v }))} />
             </div>
           )}
           <Slider label="Year" value={s.year} min={2026} max={2034} step={1} fmt={String} onChange={set("year")} />
@@ -258,6 +261,7 @@ export default function Dashboard() {
           <TornadoCard p={p} s={s} />
           <RiskCard p={p} s={s} />
           {sector === "steel" && <CrossoverCard s={s} />}
+          {sector === "steel" && <OptimiserCard key={p.id} p={p} s={s} />}
 
           <Card title="Decarbonisation lab: which levers pay back?" sub={`${p.name}, 10% discount rate, capex in 2026, benefits from 2027. CBAM saving = avoided certificates × pass-through × EU share of output.`}>
             <button onClick={exportLevers} className="mb-3 rounded-md border border-line px-3 py-1 text-xs hover:bg-bg">Download CSV</button>
@@ -306,6 +310,8 @@ export default function Dashboard() {
               <p className="text-xs text-ink-3 mt-2">Levers left of the dashed line cost less per tonne of CO₂ than buying certificates. Only levers that cut direct emissions avoid steel CBAM.</p>
             </div>
           </Card>
+
+          {sector === "steel" && <H2OptionCard s={s} />}
 
           <Card title="Timeline: law today vs proposals">
             <ol className="text-sm space-y-2">

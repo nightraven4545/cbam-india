@@ -99,6 +99,15 @@ export default function Methodology() {
         <tbody>{(["steel", "aluminium"] as const).flatMap((k) => PEER_DEFAULTS[k].map((x) => <tr key={k + x.country}><td>{k}</td><td>{x.country}</td><td>{x.value}</td><td className="text-xs">{x.source}</td></tr>))}</tbody>
       </table>
 
+      <h2>Phase 3 methods</h2>
+      <ul>
+        <li><strong>Article 9 simulator:</strong> credit per tonne = min(gross CBAM, paid in India) × the qualifying share. Paid = price × intensity (explicit price) or price × intensity × target cut (CCTS intensity design). Modelled producers are scaled to the Eurostat 2025 sector volume (steel 4.01 Mt, aluminium 0.313 Mt).</li>
+        <li><strong>Downstream radar:</strong> EU-27 imports from India in 2024 by HS-4 (UN Comtrade, reporter 97, partner 699). Status: Annex I today vs the COM(2025) 989 proposal (only some lines are covered). Cost = metal tonnes × max(0, E − F_t × B) × P, with steel E = 2.2 verified or the default plus mark-up.</li>
+        <li><strong>Trade optimiser:</strong> two markets with linear margins. The EU net premium per plant = premium − pass-through × plant CBAM, with plant benchmarks weighted by DRI share. Greedy allocation under the cap is exactly optimal (checked against brute force in tests).</li>
+        <li><strong>H₂ real option:</strong> a CRR binomial lattice on the certificate price (u = e^σ, drift = scenario growth, 10% discount). It is an American option to invest 2026–34. Project value at exercise = 25 years of avoided CBAM on a dedicated EU line × pass-through + green premium − an H₂ OPEX premium that falls with the H₂ cost, minus capex. After exercise, prices follow scenario growth.</li>
+        <li><strong>Cement:</strong> indirect emissions are charged by law. Defaults (1.48 t) are taken as already covering them. Intensities are on an OPC basis (CN 2523 29); blended cements fall under other CN codes.</li>
+      </ul>
+
       <h2>Known limitations</h2>
       <ul>
         <li>One CN code per sector (7208 HR flat; 7601 unwrought aluminium). Cold-rolled and coated steel (7209/7210) and semi-fabricated aluminium carry higher defaults that are not yet modelled, because India&apos;s country defaults for those codes could not be verified.</li>

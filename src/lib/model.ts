@@ -1,5 +1,5 @@
 import { YEARS, cbamCostPerTonne, priceIn, npv, irr, paybackYears, type Mode, type Regime } from "./cbam";
-import { PRODUCTS, benchmarkFor, type Producer, type Lever, type Competitor } from "./data";
+import { PRODUCTS, INDIRECT_IN_LAW, benchmarkFor, type Producer, type Lever, type Competitor, type Plant } from "./data";
 
 export interface Scenario {
   year: number;
@@ -18,13 +18,21 @@ export const DEFAULT_SCENARIO: Scenario = {
 
 export interface CostOpts { year?: number; direct?: number; indirect?: number; price?: number }
 
+// Indirect emissions count when the law says so (cement) or under the stress test. Cement defaults already include them.
+function indirectFor(p: Producer, s: Scenario, mode: Mode, override?: number) {
+  const inLaw = INDIRECT_IN_LAW[p.sector];
+  if (!inLaw && !s.includeIndirect) return 0;
+  if (inLaw && mode === "default") return 0;
+  return override ?? p.indirect.value;
+}
+
 export function producerCost(p: Producer, s: Scenario, mode: Mode, o: CostOpts = {}) {
   const year = o.year ?? s.year;
   return cbamCostPerTonne({
     year, mode,
     defaultValue: PRODUCTS[p.sector].defaultValue.value,
     actual: o.direct ?? p.actualDirect.value,
-    indirect: s.includeIndirect ? (o.indirect ?? p.indirect.value) : 0,
+    indirect: indirectFor(p, s, mode, o.indirect),
     benchmark: benchmarkFor(p),
     price: o.price ?? priceIn(year, s.basePrice, s.growth),
     originCarbonPrice: s.originCarbonPrice,
@@ -92,7 +100,7 @@ export function leverEconomics(p: Producer, l: Lever, s: Scenario, o: LeverOpts)
     irr: irr(flows),
     payback: paybackYears(flows),
     mac: abated > 0 ? annualCost / abated : null, // € / tCO2 avoided (excluding CBAM and CCTS revenue)
-    cbamRelevant: l.abatement > 0 || (s.includeIndirect && l.scope2Cut > 0),
+    cbamRelevant: l.abatement > 0 || ((s.includeIndirect || INDIRECT_IN_LAW[p.sector]) && l.scope2Cut > 0),
   };
 }
 
@@ -124,4 +132,37 @@ export function crossoverPrice(a: Competitor, b: Competitor, year: number, regim
   if (Math.abs(slope) < 1e-9) return null;
   const p = -at0 / slope;
   return p >= 0 && p <= 1000 ? p : null;
+}
+
+// Two-market allocation (EU vs rest of world) across plants under an EU volume cap.
+// With linear margins the greedy rank by EU net premium per tonne is exactly optimal.
+export interface AllocOpts { euCap: number; euPremium: number } // Mt; € / t EU price premium over rest-of-world
+export function plantCbam(p: Producer, pl: Plant, s: Scenario) {
+  const b = PRODUCTS.steel.benchmarks;
+  return cbamCostPerTonne({
+    year: s.year, mode: "actual", defaultValue: 0, actual: pl.intensity,
+    benchmark: (1 - pl.driShare) * b[0].value + pl.driShare * b[1].value,
+    price: priceIn(s.year, s.basePrice, s.growth), originCarbonPrice: s.originCarbonPrice, regime: s.regime,
+  }).net;
+}
+export function optimiseAllocation(p: Producer, s: Scenario, o: AllocOpts) {
+  const plants = (p.plants ?? []).map((pl) => {
+    const cbam = plantCbam(p, pl, s);
+    return { ...pl, cbam, netPremium: o.euPremium - cbam * s.passThrough };
+  });
+  const total = plants.reduce((a, x) => a + x.capacity, 0);
+  // Pro-rata baseline: the cap spread across plants by capacity, regardless of carbon.
+  const prorata = plants.map((x) => ({ name: x.name, eu: total ? (o.euCap * x.capacity) / total : 0 }));
+  let left = o.euCap;
+  const ranked = [...plants].sort((a, b) => b.netPremium - a.netPremium);
+  const opt = new Map<string, number>();
+  for (const x of ranked) {
+    const take = x.netPremium > 0 ? Math.min(left, x.capacity) : 0;
+    opt.set(x.name, take);
+    left -= take;
+  }
+  const value = (alloc: { name: string; eu: number }[]) =>
+    alloc.reduce((a, r) => a + r.eu * 1e6 * plants.find((x) => x.name === r.name)!.netPremium, 0);
+  const optimised = plants.map((x) => ({ name: x.name, eu: opt.get(x.name) ?? 0 }));
+  return { plants, prorata, optimised, valueProrata: value(prorata), valueOptimised: value(optimised) };
 }

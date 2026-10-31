@@ -52,3 +52,9 @@ body {
 .prose-cbam th, .prose-cbam td { border-bottom: 1px solid var(--line); padding: .45rem .6rem; text-align: left; vertical-align: top; }
 .prose-cbam th { color: var(--ink); font-weight: 600; }
 .prose-cbam code { font-size: .85em; background: var(--line); padding: .05rem .3rem; border-radius: 4px; }
+
+@media print {
+  @page { size: A4 landscape; margin: 10mm; }
+  body { background: #fff; }
+  .slide { break-after: page; border: none; aspect-ratio: auto; min-height: 180mm; margin: 0; max-width: none; }
+}
