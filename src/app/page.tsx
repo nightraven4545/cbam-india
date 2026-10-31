@@ -7,6 +7,7 @@ import MiniWaterfall from "@/components/pages/MiniWaterfall";
 import { annualBill } from "@/lib/roadmap";
 import { facts } from "@/lib/storyline";
 import { DirectIcon, VerifiedIcon, EuroIcon } from "@/components/visual/icons";
+import { Compass, FileText, SlidersHorizontal } from "lucide-react";
 import { Scorecard } from "@/components/consulting/exhibits";
 import { SCORECARD_RULES, scorecard } from "@/lib/exhibits";
 
@@ -108,9 +109,9 @@ export default function Summary() {
           <p className="text-ink-2 mt-1">A 6-week structured problem-solving engagement: one key question, four branches, eight hypotheses tested against a unit-tested model of the regulation.</p>
         </div>
         <div className="flex gap-2 text-sm">
-          <Link href="/approach" className="rounded-md bg-ink text-bg px-4 py-2 font-medium">See the approach</Link>
-          <Link href="/model" className="rounded-md border border-line px-4 py-2 hover:border-ink-3">Open the model</Link>
-          <a href="/CBAM-India-one-pager.pdf" className="rounded-md border border-line px-4 py-2 hover:border-ink-3">One-page PDF</a>
+          <Link href="/approach" className="btn btn-primary"><Compass aria-hidden size={15} />See the approach</Link>
+          <Link href="/model" className="btn btn-secondary"><SlidersHorizontal aria-hidden size={15} />Open the model</Link>
+          <a href="/CBAM-India-one-pager.pdf" className="btn btn-secondary"><FileText aria-hidden size={15} />One-page PDF</a>
         </div>
       </Panel>
     </div>

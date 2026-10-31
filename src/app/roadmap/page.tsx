@@ -49,16 +49,18 @@ export default function Roadmap() {
   return (
     <div>
       <PageHeader step="answer" title={`Twelve initiatives across companies, government and MSME clusters; five modelled moves alone cut the 2026–34 bill from ${bn(f.vas.doNothing)} to ${bn(f.vas.residual)}`}
-        lede="The roadmap turns the analysis into owned, sequenced work: what it is worth, how hard it is, who does it, when, and the first 90 days." />
-
+        lede="The roadmap turns the analysis into owned, sequenced work: what it is worth, how hard it is, who does it, when, and the first 90 days." >
       <KpiStrip items={[
-        { icon: TriangleAlert, value: bn(f.vas.doNothing), label: "2026–34 bill if the top five do nothing", tone: "s2" },
-        { icon: Target, value: bn(f.vas.residual), label: "Residual after the five modelled moves", tone: "s3" },
-        { icon: ShieldCheck, value: `${verifyShare}%`, label: "of the saving comes from verified data alone", tone: "s1" },
-        { icon: Zap, value: `${nowCount} of ${ins.length}`, label: `initiatives start now; ${quickIds.length} are quick wins`, tone: "ink" },
-      ]} />
+          { icon: TriangleAlert, value: bn(f.vas.doNothing), label: "2026–34 bill if the top five do nothing", tone: "s2" },
+          { icon: Target, value: bn(f.vas.residual), label: "Residual after the five modelled moves", tone: "s3" },
+          { icon: ShieldCheck, value: `${verifyShare}%`, label: "of the saving comes from verified data alone", tone: "s1" },
+          { icon: Zap, value: `${nowCount} of ${ins.length}`, label: `initiatives start now; ${quickIds.length} are quick wins`, tone: "ink" },
+        ]} />
+      </PageHeader>
 
-      <div className="mt-8 xl:grid xl:grid-cols-[1fr_200px] xl:gap-10">
+
+
+      <div className="xl:grid xl:grid-cols-[1fr_200px] xl:gap-10">
         <div className="grid gap-6 min-w-0">
           <section id="value" className="grid gap-4 scroll-mt-20">
             <Takeaway>{`Verification is the single biggest move: it removes ${bn(-f.vas.steps[1].value)} before any plant is touched. Operations and Article 9 then take the bill to ${bn(f.vas.residual)}.`}</Takeaway>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ChartColumn, Table2 } from "lucide-react";
 
 export interface TableData { columns: string[]; rows: (string | number)[][] }
 
@@ -10,17 +11,16 @@ export function Exhibit({ n, title, subtitle, source, table, children, controls 
 }) {
   const [asTable, setAsTable] = useState(false);
   return (
-    <figure className="min-w-0 rounded-[10px] border border-line bg-surface p-4 sm:p-6">
+    <figure id={n !== undefined ? `exhibit-${n}` : undefined} className="min-w-0 scroll-mt-20 rounded-xl border border-line bg-surface p-4 sm:p-6 shadow-[0_1px_2px_rgb(11_31_54/0.04)]">
       <figcaption className="flex flex-wrap items-start justify-between gap-3">
         <div className="max-w-[70ch]">
-          {n !== undefined && <p className="text-xs text-ink-3 mb-1">Exhibit {n}</p>}
+          {n !== undefined && <p className="mb-2"><a href={`#exhibit-${n}`} className="inline-flex items-center rounded-md bg-masthead px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-on-dark hover:bg-masthead-3">Exhibit {n}</a></p>}
           <h3 className="font-cond text-lg sm:text-xl font-semibold leading-snug">{title}</h3>
           {subtitle && <p className="text-sm text-ink-2 mt-1">{subtitle}</p>}
         </div>
         {table && (
-          <button type="button" onClick={() => setAsTable((v) => !v)} aria-pressed={asTable}
-            className="text-xs rounded-md border border-line px-2.5 py-1 text-ink-2 hover:text-ink hover:border-ink-3">
-            {asTable ? "Show chart" : "Show table"}
+          <button type="button" onClick={() => setAsTable((v) => !v)} aria-pressed={asTable} className="chip">
+            {asTable ? <ChartColumn aria-hidden size={13} /> : <Table2 aria-hidden size={13} />}{asTable ? "Show chart" : "Show table"}
           </button>
         )}
       </figcaption>

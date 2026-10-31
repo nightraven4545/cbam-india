@@ -84,7 +84,7 @@ export default function TreeDiagram({ root }: { root: INode }) {
                 {sel.children.map((c) => <li key={c.id} className="rounded-md border border-line p-3 text-sm"><p className="font-medium flex gap-1.5"><Status s={c.status} />{c.q}</p>{c.finding && <p className="text-ink-2 mt-1">{c.finding}</p>}</li>)}
               </ul>
             )}
-            {sel.href && <Link href={sel.href} className="mt-5 inline-block rounded-md bg-ink text-bg px-4 py-2 text-sm font-medium">See the analysis</Link>}
+            {sel.href && <Link href={sel.href} className="btn btn-primary mt-5">See the analysis</Link>}
           </aside>
         </div>
       )}

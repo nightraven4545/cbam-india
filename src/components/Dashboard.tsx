@@ -14,6 +14,7 @@ import { CrossoverCard, RiskCard, TornadoCard } from "./Phase2Cards";
 import { H2OptionCard, OptimiserCard } from "./Phase3Cards";
 import { DEFAULT_SCENARIO, cumulativeExposure, leverEconomics, producerSummary, trajectory, type Scenario } from "@/lib/model";
 import { cbamFactor, defaultMarkup } from "@/lib/cbam";
+import { Check, Download, FileSpreadsheet, Link2 } from "lucide-react";
 import { DriverTree, HarveyTable, Macc } from "./consulting/exhibits";
 import { driverTree, leverAssessment, macc } from "@/lib/exhibits";
 
@@ -166,7 +167,7 @@ export default function Dashboard() {
                 const active = (Object.keys(target) as (keyof Scenario)[]).every((k) => target[k] === s[k]);
                 return (
                   <button key={pr.label} type="button" title={pr.hint} aria-pressed={active} onClick={() => setS(target)}
-                    className={`rounded-md border px-2 py-1.5 text-sm ${active ? "bg-ink text-bg border-ink" : "border-line text-ink-2 hover:border-ink-3"}`}>{pr.label}</button>
+                    className="chip justify-center h-8 text-sm">{pr.label}</button>
                 );
               })}
             </div>
@@ -187,8 +188,8 @@ export default function Dashboard() {
             <input type="checkbox" className="mt-1" checked={s.includeIndirect} onChange={(e) => set("includeIndirect")(e.target.checked)} />
             <span>Stress test: charge indirect (electricity) emissions too<span className="block text-xs text-ink-3">Not law for steel or aluminium today; it is under review.</span></span>
           </label>
-          <button onClick={copyLink} className="w-full rounded-md border border-line py-1.5 text-sm hover:bg-bg">{copied ? "Link copied ✓" : "Copy link to this scenario"}</button>
-          <a href="/cbam-india-model.xlsx" download className="block w-full rounded-md bg-ink text-bg py-1.5 text-sm text-center font-medium">Download the Excel model</a>
+          <button onClick={copyLink} className="btn btn-secondary w-full">{copied ? <Check aria-hidden size={15} /> : <Link2 aria-hidden size={15} />}{copied ? "Link copied" : "Copy link to this scenario"}</button>
+          <a href="/cbam-india-model.xlsx" download className="btn btn-primary w-full"><FileSpreadsheet aria-hidden size={15} />Download the Excel model</a>
           <p className="text-xs text-ink-3">{s.year}: CBAM factor {pct(cbamFactor(s.year, s.regime))} · default mark-up {pct(defaultMarkup(s.year))} · price {eur(price, 2)}</p>
         </aside>
 
@@ -235,7 +236,7 @@ export default function Dashboard() {
                 <DriverTree root={tree} />
               </Card>
               <Card title="Producer leaderboard" sub={`Year ${s.year}, ${pct(s.passThrough)} pass-through. "Cum." covers 2026–2034 at this pass-through. Click a row to select it.`}>
-                <button onClick={exportLeaderboard} className="mb-3 rounded-md border border-line px-3 py-1 text-xs hover:bg-bg">Download CSV</button>
+                <button onClick={exportLeaderboard} className="btn btn-secondary btn-sm mb-3"><Download aria-hidden size={13} />Download CSV</button>
                 <div tabIndex={0} className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead className="text-left text-ink-3">
@@ -300,7 +301,7 @@ export default function Dashboard() {
             </Tabs.Content>
             <Tabs.Content value="levers" className="space-y-6">
               <Card title="Decarbonisation lab: which levers pay back?" sub={`${p.name}, 10% discount rate, capex in 2026, benefits from 2027. CBAM saving = avoided certificates × pass-through × EU share of output.`}>
-                <button onClick={exportLevers} className="mb-3 rounded-md border border-line px-3 py-1 text-xs hover:bg-bg">Download CSV</button>
+                <button onClick={exportLevers} className="btn btn-secondary btn-sm mb-3"><Download aria-hidden size={13} />Download CSV</button>
                 <div className="flex flex-wrap gap-x-8 gap-y-3 text-sm mb-4">
                   <label className="flex items-center gap-2"><input type="checkbox" checked={dedicatedEU} onChange={(e) => setDedicatedEU(e.target.checked)} /> Dedicated EU line (all low-carbon output sold to the EU)</label>
                   <div className="w-56"><Slider label="CCTS credit price (€/t)" value={cctsPrice} min={0} max={40} step={1} fmt={(v) => eur(v)} onChange={setCcts} /></div>

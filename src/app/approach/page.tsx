@@ -36,10 +36,11 @@ export default function Approach() {
     { id: "plan", label: "Six-week plan" }, { id: "confidence", label: "Data confidence" },
   ];
   return (
+    <div>
+      <PageHeader step="question" title="One client question, four branches, eight hypotheses tested against a model of the regulation"
+        lede={<span className="inline-flex items-center gap-2 text-sm"><TimeIcon aria-hidden size={15} />3-minute read. Select any box in the issue tree to see what we found.</span>} />
     <div className="xl:grid xl:grid-cols-[1fr_190px] xl:gap-10">
       <div className="min-w-0">
-        <PageHeader step="question" title="One client question, four branches, eight hypotheses tested against a model of the regulation"
-          lede={<span className="inline-flex items-center gap-2 text-sm"><TimeIcon aria-hidden size={15} className="text-ink-3" />3-minute read. Select any box in the issue tree to see what we found.</span>} />
 
         <section id="workflow" className="scroll-mt-20 space-y-4">
           <Takeaway>Every number on this site comes out of one tested engine, so the recommendations trace back to the regulation and the data.</Takeaway>
@@ -95,6 +96,7 @@ export default function Approach() {
         </section>
       </div>
       <Toc items={TOC} />
+    </div>
     </div>
   );
 }

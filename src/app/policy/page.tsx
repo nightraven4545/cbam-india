@@ -39,15 +39,17 @@ export default function Policy() {
   return (
     <div>
       <PageHeader title={`An explicit Indian carbon price could keep ${bn(f.polExplicit)} of CBAM at home; CCTS as designed keeps ${m(f.polCcts)}, and MSMEs are already exposed`}
-        lede="Tools for government and industry bodies: how much CBAM revenue India could retain through its own carbon price, which policy design does it, which engineering exports and clusters CBAM touches, and what it costs a small exporter per unit." />
+        lede="Tools for government and industry bodies: how much CBAM revenue India could retain through its own carbon price, which policy design does it, which engineering exports and clusters CBAM touches, and what it costs a small exporter per unit." >
       <KpiStrip items={[
-        { icon: Landmark, value: bn(f.polExplicit), label: "kept in India 2026–34 with an explicit €20/t price", tone: "s1" },
-        { icon: Layers, value: m(f.polCcts), label: "kept under CCTS as designed (same price)", tone: "ink" },
-        { icon: Ship, value: `$${f.dsIn.toFixed(1)}bn`, label: `of EU engineering imports from India already in CBAM; $${f.dsProp.toFixed(1)}bn more proposed`, tone: "s2" },
-        { icon: Users, value: `€${unitD.toFixed(2)}`, label: `CBAM per 2.5 kg steel part on defaults in 2028 (€${unitV.toFixed(2)} verified)`, tone: "s3" },
-      ]} />
+          { icon: Landmark, value: bn(f.polExplicit), label: "kept in India 2026–34 with an explicit €20/t price", tone: "s1" },
+          { icon: Layers, value: m(f.polCcts), label: "kept under CCTS as designed (same price)", tone: "ink" },
+          { icon: Ship, value: `$${f.dsIn.toFixed(1)}bn`, label: `of EU engineering imports from India already in CBAM; $${f.dsProp.toFixed(1)}bn more proposed`, tone: "s2" },
+          { icon: Users, value: `€${unitD.toFixed(2)}`, label: `CBAM per 2.5 kg steel part on defaults in 2028 (€${unitV.toFixed(2)} verified)`, tone: "s3" },
+        ]} />
+      </PageHeader>
 
-      <div className="mt-8 xl:grid xl:grid-cols-[1fr_200px] xl:gap-10">
+
+      <div className="xl:grid xl:grid-cols-[1fr_200px] xl:gap-10">
         <div className="grid gap-6 min-w-0">
           <section id="art9" className="grid gap-4 scroll-mt-20">
             <Takeaway>The design of India&apos;s carbon price matters more than its level: only a price paid on every exported tonne turns CBAM into Indian revenue.</Takeaway>

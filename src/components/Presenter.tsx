@@ -22,7 +22,7 @@ export default function Presenter({ children }: { children: React.ReactNode }) {
   const stop = () => { setOn(false); if (document.fullscreenElement) document.exitFullscreen().catch(() => {}); };
   if (!on) return (
     <div>
-      <button type="button" onClick={start} className="mb-6 rounded-md bg-ink text-bg px-4 py-2 text-sm font-medium print:hidden">Present (← → to move, Esc to exit)</button>
+      <button type="button" onClick={start} className="btn btn-primary mb-6">Present (← → to move, Esc to exit)</button>
       {slides}
     </div>
   );
@@ -32,7 +32,7 @@ export default function Presenter({ children }: { children: React.ReactNode }) {
       <div className="fixed bottom-4 right-4 flex gap-2 text-sm">
         <button type="button" onClick={() => go(-1)} className="rounded-md border border-line bg-surface px-3 py-1.5" disabled={i === 0}>Previous</button>
         <button type="button" onClick={() => go(1)} className="rounded-md border border-line bg-surface px-3 py-1.5" disabled={i === slides.length - 1}>Next</button>
-        <button type="button" onClick={stop} className="rounded-md bg-ink text-bg px-3 py-1.5">Exit</button>
+        <button type="button" onClick={stop} className="btn btn-primary">Exit</button>
       </div>
     </div>
   );

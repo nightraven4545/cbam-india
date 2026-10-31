@@ -72,6 +72,23 @@ Last updated: 31 Oct 2026.
     - an icon formula strip in the MSME calculator.
   - Helpers moved to `src/lib/policy.ts` and tested. 47 tests.
 
+- v5, navy masthead theme (user chose it over warm paper and dark-by-default):
+  - Tokens:
+    - `--masthead`, `--masthead-2` and `--masthead-3`; `--on-dark`, `--on-dark-2` and `--on-dark-accent`;
+    - `--brand` #1d62b5, because white on the chart blue is only 4.4:1;
+    - steel-grey page background.
+  - Button classes in globals.css: `.btn`, `-primary`, `-secondary`, `-ghost`, `-on-dark`, `-sm`, plus `.chip`.
+  - Nav:
+    - navy bar, IN→EU logo mark, 7 icon pills;
+    - Resources menu (Esc and outside click close it);
+    - Excel button and light/dark toggle, persisted via an inline pre-paint script in layout.tsx;
+    - mobile sheet below xl.
+  - Page layout:
+    - PageHeader is a full-bleed navy band (html/body `overflow-x: clip`) with a chevron stepper; KPI strips sit inside the band;
+    - StoryPager (previous/next step) and a back-to-top button via `PageExtras`;
+    - navy footer with link columns.
+  - Exhibits get a navy "Exhibit n" chip, an `#exhibit-n` anchor and a "Show table" chip.
+
 ## Next
 - A ₹/€ toggle, plus takeaways and contents panels on the model and industry pages.
 - ESG data gaps: SAIL and AM/NS intensity, SBTi status (check the SBTi target dashboard), renewable shares and BRSR Core assurance status.
@@ -101,5 +118,6 @@ Last updated: 31 Oct 2026.
 - Logo img errors can fire before hydration; Logo checks `naturalWidth` after mount.
 - ESG figures: corporate Scope 1+2 per tonne of crude steel (BRSR/factsheet) is not the CBAM boundary (direct, per product). The two are kept apart, and the taxonomy rating uses the corporate figure only as a proxy.
 - Never nest block lists inside `<p>` (e.g. OwnerLegend renders a `<ul>`). React hydration fails and axe flags it. KpiStrip uses `<ul>/<li>`, not `<dl>`.
+- Text on the navy band must use the on-dark tokens. A sidebar (Toc) placed in the same grid row as PageHeader lands on navy: keep PageHeader outside two-column grids.
 - Do not `pkill -f` with a pattern that also matches your own shell command.
 - Commits: author `Shreshtha <77679539+nightraven4545@users.noreply.github.com>`, no AI co-author trailers.
