@@ -6,6 +6,7 @@ import CliffChart from "@/components/pages/CliffChart";
 import MiniWaterfall from "@/components/pages/MiniWaterfall";
 import { annualBill } from "@/lib/roadmap";
 import { facts } from "@/lib/storyline";
+import { DirectIcon, VerifiedIcon, EuroIcon } from "@/components/visual/icons";
 
 export default function Summary() {
   const f = facts();
@@ -48,15 +49,15 @@ export default function Summary() {
         <Panel className="p-5 sm:p-6 grid gap-6 sm:grid-cols-3">
           <div>
             <p className="font-cond text-4xl font-semibold text-s2i leading-none"><Ticker value={f.defaultPerT} prefix="€" suffix="/t" /></p>
-            <p className="text-sm text-ink-2 mt-2">2026 CBAM on a tonne of Indian hot-rolled coil, charged on EU default values</p>
+            <p className="text-sm text-ink-2 mt-2 flex gap-1.5"><DirectIcon aria-hidden size={16} className="mt-0.5 shrink-0 text-s2i" />2026 CBAM on a tonne of Indian hot-rolled coil, charged on EU default values</p>
           </div>
           <div>
             <p className="font-cond text-4xl font-semibold text-s1i leading-none"><Ticker value={f.verifiedPerT} prefix="€" suffix="/t" /></p>
-            <p className="text-sm text-ink-2 mt-2">The same tonne from Tata Steel&apos;s BF-BOF with verified emissions data</p>
+            <p className="text-sm text-ink-2 mt-2 flex gap-1.5"><VerifiedIcon aria-hidden size={16} className="mt-0.5 shrink-0 text-s1i" />The same tonne from Tata Steel&apos;s BF-BOF with verified emissions data</p>
           </div>
           <div>
             <p className="font-cond text-4xl font-semibold text-s3i leading-none"><Ticker value={f.verification / 1e6} prefix="€" suffix="m" /></p>
-            <p className="text-sm text-ink-2 mt-2">Value of verified data per year to EU buyers of the five largest exporters</p>
+            <p className="text-sm text-ink-2 mt-2 flex gap-1.5"><EuroIcon aria-hidden size={16} className="mt-0.5 shrink-0 text-s3i" />Value of verified data per year to EU buyers of the five largest exporters</p>
           </div>
         </Panel>
 

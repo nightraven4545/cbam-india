@@ -27,7 +27,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <Nav />
         <main id="main" className="mx-auto max-w-[1240px] px-4 py-8 sm:py-10">{children}</main>
         <footer className="mx-auto max-w-[1240px] px-4 py-8 text-xs text-ink-3 border-t border-line print:hidden">
-          Prepared by Shreshtha, 31 Oct 2026. Producer inputs are graded A–E for confidence; grade D values are analyst estimates, not company disclosures. Not investment advice.
+          Prepared by Shreshtha, 31 Oct 2026. Producer inputs are graded A–E for confidence; grade D values are analyst estimates, not company disclosures. Company logos are trademarks of their owners, used for identification only. Not investment advice.
         </footer>
       </body>
     </html>

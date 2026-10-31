@@ -158,35 +158,35 @@ export function benchmarkFor(p: Producer): number {
 }
 
 // Country default values (direct, before mark-up). Source per row.
-export const PEER_DEFAULTS: Record<Sector, { country: string; value: number; source: string }[]> = {
+export const PEER_DEFAULTS: Record<Sector, { country: string; value: number; source: string; flag: "IN" | "CN" | "TR" | "KR" | "AE" }[]> = {
   steel: [
-    { country: "India (HR flat)", value: 4.28, source: S.defaults },
-    { country: "China (HR flat)", value: 3.187, source: "cbamguide.com/countries/china" },
-    { country: "Türkiye (bars/rods)", value: 2.31, source: "cbamguide.com/countries/turkey (no 7208 value listed)" },
-    { country: "South Korea (HR flat)", value: 2.118, source: "cbamguide.com/countries/south-korea; Projet Celsius" },
+    { flag: "IN", country: "India (HR flat)", value: 4.28, source: S.defaults },
+    { flag: "CN", country: "China (HR flat)", value: 3.187, source: "cbamguide.com/countries/china" },
+    { flag: "TR", country: "Türkiye (bars/rods)", value: 2.31, source: "cbamguide.com/countries/turkey (no 7208 value listed)" },
+    { flag: "KR", country: "South Korea (HR flat)", value: 2.118, source: "cbamguide.com/countries/south-korea; Projet Celsius" },
   ],
   cement: [
-    { country: "India", value: 1.48, source: "cbamguide.com/countries/india" },
-    { country: "Other / Türkiye", value: 1.44, source: "cbamguide.com/compliance/default-values" },
+    { flag: "IN", country: "India", value: 1.48, source: "cbamguide.com/countries/india" },
+    { flag: "TR", country: "Other / Türkiye", value: 1.44, source: "cbamguide.com/compliance/default-values" },
   ],
   aluminium: [
-    { country: "China", value: 3.0, source: "Argus Media; cbamguide.com/countries/china" },
-    { country: "India", value: 1.87, source: S.alDefault },
-    { country: "UAE / Bahrain", value: 1.87, source: "cbamguide.com/compliance/default-values" },
-    { country: "South Korea", value: 0.36, source: "cbamguide.com/countries/south-korea" },
+    { flag: "CN", country: "China", value: 3.0, source: "Argus Media; cbamguide.com/countries/china" },
+    { flag: "IN", country: "India", value: 1.87, source: S.alDefault },
+    { flag: "AE", country: "UAE / Bahrain", value: 1.87, source: "cbamguide.com/compliance/default-values" },
+    { flag: "KR", country: "South Korea", value: 0.36, source: "cbamguide.com/countries/south-korea" },
   ],
 };
 
 // Delivered-cost competitors into the EU (HR coil). FOB and freight are illustrative D-grade 2026 levels;
 // intensity is the direct tCO2e/t the importer would declare (verified-equivalent estimate unless stated).
-export interface Competitor { origin: string; fob: number; freight: number; intensity: number; benchmark: number; note: string }
+export interface Competitor { flag: "IN" | "TR" | "KR" | "CN" | "EU"; origin: string; fob: number; freight: number; intensity: number; benchmark: number; note: string }
 export const COMPETITORS: Competitor[] = [
-  { origin: "India · verified BF-BOF", fob: 520, freight: 35, intensity: 2.1, benchmark: 1.37, note: "Efficient BF-BOF with verified data" },
-  { origin: "India · on defaults", fob: 520, freight: 35, intensity: 4.28 * 1.1, benchmark: 1.37, note: "4.28 default + 2026 mark-up" },
-  { origin: "Türkiye · EAF-heavy", fob: 545, freight: 15, intensity: 1.0, benchmark: 0.481, note: "Mostly scrap/DRI-EAF; short haul" },
-  { origin: "South Korea · BF-BOF", fob: 540, freight: 45, intensity: 2.0, benchmark: 1.37, note: "POSCO/Hyundai-type verified BF-BOF" },
-  { origin: "China · on defaults", fob: 480, freight: 45, intensity: 3.187 * 1.1, benchmark: 1.37, note: "3.187 default + mark-up" },
-  { origin: "EU mill · BF-BOF (ETS)", fob: 600, freight: 10, intensity: 1.8, benchmark: 1.37, note: "Same free-allocation formula under the EU ETS" },
+  { flag: "IN", origin: "India · verified BF-BOF", fob: 520, freight: 35, intensity: 2.1, benchmark: 1.37, note: "Efficient BF-BOF with verified data" },
+  { flag: "IN", origin: "India · on defaults", fob: 520, freight: 35, intensity: 4.28 * 1.1, benchmark: 1.37, note: "4.28 default + 2026 mark-up" },
+  { flag: "TR", origin: "Türkiye · EAF-heavy", fob: 545, freight: 15, intensity: 1.0, benchmark: 0.481, note: "Mostly scrap/DRI-EAF; short haul" },
+  { flag: "KR", origin: "South Korea · BF-BOF", fob: 540, freight: 45, intensity: 2.0, benchmark: 1.37, note: "POSCO/Hyundai-type verified BF-BOF" },
+  { flag: "CN", origin: "China · on defaults", fob: 480, freight: 45, intensity: 3.187 * 1.1, benchmark: 1.37, note: "3.187 default + mark-up" },
+  { flag: "EU", origin: "EU mill · BF-BOF (ETS)", fob: 600, freight: 10, intensity: 1.8, benchmark: 1.37, note: "Same free-allocation formula under the EU ETS" },
 ];
 
 export interface Lever {

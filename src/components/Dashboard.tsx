@@ -8,6 +8,8 @@ import {
 import { PRODUCERS, LEVERS, PEER_DEFAULTS, PRODUCTS, benchmarkFor, type Producer, type Sector } from "@/lib/data";
 import { AXIS, Card, Grade, Slider, TIP, eur, inr, m, pct } from "./ui";
 import { PageHeader } from "./consulting/core";
+import { FlagTick } from "./consulting/charts";
+import { Logo } from "./visual/Logo";
 import { CrossoverCard, RiskCard, TornadoCard } from "./Phase2Cards";
 import { H2OptionCard, OptimiserCard } from "./Phase3Cards";
 import { DEFAULT_SCENARIO, cumulativeExposure, leverEconomics, producerSummary, trajectory, type Scenario } from "@/lib/model";
@@ -234,7 +236,7 @@ export default function Dashboard() {
                     <tbody>
                       {rows.map(({ p: x, r: y, cumA, cumD }) => (
                         <tr key={x.id} onClick={() => setPid(x.id)} className={`border-t border-line cursor-pointer hover:bg-bg ${x.id === p.id ? "bg-bg font-medium" : ""}`}>
-                          <td className="py-2 pr-3 whitespace-nowrap">{x.name}</td>
+                          <td className="py-2 pr-3 whitespace-nowrap"><span className="inline-flex items-center gap-2"><Logo id={x.id} name={x.name} size={18} />{x.name}</span></td>
                           <td className="pr-3">{x.actualDirect.value}<Grade c={x.actualDirect.confidence} /></td>
                           <td className="pr-3">{eur(y.def.net)}</td>
                           <td className="pr-3">{eur(y.act.net)}</td>
@@ -271,7 +273,7 @@ export default function Dashboard() {
                       <BarChart data={peer} layout="vertical" margin={{ left: 40, right: 16 }}>
                         <CartesianGrid horizontal={false} stroke="var(--line)" />
                         <XAxis type="number" tick={AXIS} tickLine={false} />
-                        <YAxis type="category" dataKey="country" tick={AXIS} width={120} tickLine={false} />
+                        <YAxis type="category" dataKey="country" tick={<FlagTick flags={Object.fromEntries(peer.map((d) => [d.country, d.flag]))} />} width={150} tickLine={false} />
                         <Tooltip {...TIP} formatter={(v: number) => v.toFixed(2)} />
                         <Bar dataKey="marked" name="Default incl. mark-up" fill="var(--s2)" radius={4} isAnimationActive={false} />
                       </BarChart>

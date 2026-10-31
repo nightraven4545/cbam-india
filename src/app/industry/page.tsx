@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PageHeader, Panel } from "@/components/consulting/core";
+import { Company } from "@/components/visual/Logo";
 import { Exhibit } from "@/components/consulting/Exhibit";
 import { ExposureMatrix, Flows, Footprint, GapChart, RouteMix, Spark } from "@/components/pages/IndustryCharts";
 import { EU_STEEL_BY_CN, EU_STEEL_TOTAL_KT, PRODUCERS, benchmarkFor } from "@/lib/data";
@@ -86,7 +87,7 @@ export default function Industry() {
           <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
             {rows.map(({ p, r, t }) => (
               <li key={p.id} className="rounded-[10px] border border-line bg-surface p-4">
-                <p className="font-semibold">{p.name}</p>
+                <p className="font-semibold"><Company id={p.id} name={p.name} size={22} /></p>
                 <p className="text-xs text-ink-3 mt-0.5 min-h-8">{p.route}</p>
                 <Spark data={t} />
                 <dl className="grid grid-cols-2 gap-x-3 gap-y-1 text-sm mt-2">

@@ -241,3 +241,17 @@ export function BarList({ items, fmt = String, max }: { items: { label: string; 
     </ul>
   );
 }
+
+// Y-axis tick with a country flag before the label (for category axes).
+import { Flag, type FlagCode } from "@/components/visual/indicators";
+export function FlagTick(props: { x?: number; y?: number; payload?: { value: string }; flags: Record<string, FlagCode>; width?: number }) {
+  const { x = 0, y = 0, payload, flags } = props;
+  const label = payload?.value ?? "";
+  const code = flags[label];
+  return (
+    <g transform={`translate(${x},${y})`}>
+      <text x={code ? -24 : -4} y={0} dy={4} textAnchor="end" fontSize={11} fill="var(--ink-3)">{label}</text>
+      {code && <foreignObject x={-20} y={-7} width={18} height={14}><Flag code={code} size={12} /></foreignObject>}
+    </g>
+  );
+}

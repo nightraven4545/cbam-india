@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
-import { PageHeader, SectionTitle } from "@/components/consulting/core";
+import { PageHeader } from "@/components/consulting/core";
+import TreeDiagram from "@/components/consulting/TreeDiagram";
+import { HypothesisScorecard, Takeaway, Toc, Workflow } from "@/components/consulting/ApproachParts";
+import { TimeIcon } from "@/components/visual/icons";
 import { Exhibit } from "@/components/consulting/Exhibit";
-import { Plan, Tree } from "@/components/pages/ApproachCharts";
+import { Plan } from "@/components/pages/ApproachCharts";
 import { PRODUCERS, LEVERS, PEER_DEFAULTS, DOWNSTREAM } from "@/lib/data";
 import { WORKPLAN, hypotheses, issueTree } from "@/lib/storyline";
 
 export const metadata: Metadata = { title: "Approach", description: "Issue tree, hypotheses, workplan and data confidence behind the CBAM India analysis." };
 
-const VERDICT: Record<string, string> = { confirmed: "border-s3 text-s3i", rejected: "border-s2 text-s2i", refined: "border-s1 text-s1i" };
 
 export default function Approach() {
   const hs = hypotheses();
@@ -28,40 +30,52 @@ export default function Approach() {
   };
   const GRADE_C: Record<string, string> = { A: "var(--s3)", B: "var(--s1)", C: "#5b93dd", D: "var(--s2)", E: "var(--neutral)" };
 
+  const wrong = hs.filter((h) => h.verdict !== "confirmed").length;
+  const TOC = [
+    { id: "workflow", label: "How the work flows" }, { id: "tree", label: "Issue tree" }, { id: "hypotheses", label: "Hypotheses tested" },
+    { id: "plan", label: "Six-week plan" }, { id: "confidence", label: "Data confidence" },
+  ];
   return (
-    <div>
-      <PageHeader step="question" title="We broke one client question into four branches, tested eight hypotheses and built a model of the regulation to answer each"
-        lede="This is the problem-solving structure behind the recommendations: the issue tree, what we believed at the start and what the evidence showed, the six-week workplan, and how much each input can be trusted." />
+    <div className="xl:grid xl:grid-cols-[1fr_190px] xl:gap-10">
+      <div className="min-w-0">
+        <PageHeader step="question" title="One client question, four branches, eight hypotheses tested against a model of the regulation"
+          lede={<span className="inline-flex items-center gap-2 text-sm"><TimeIcon aria-hidden size={15} className="text-ink-3" />3-minute read. Select any box in the issue tree to see what we found.</span>} />
 
-      <div className="grid gap-6">
-        <Exhibit n={1} title="Issue tree: the key question splits into four mutually exclusive branches, each answered by a specific analysis"
-          subtitle="Expand a branch to see the sub-questions, what we found and where the analysis lives">
-          <Tree root={issueTree()} />
-        </Exhibit>
+        <section id="workflow" className="scroll-mt-20 space-y-4">
+          <Takeaway>Every number on this site comes out of one tested engine, so the recommendations trace back to the regulation and the data.</Takeaway>
+          <Exhibit n={1} title="How the work flows from sources to the roadmap" subtitle="Select a step to open the page behind it">
+            <Workflow />
+          </Exhibit>
+        </section>
 
-        <Exhibit n={2} title={`${hs.filter((h) => h.verdict !== "confirmed").length} of ${hs.length} starting hypotheses were wrong or needed refining; that is where the value of the analysis lies`}
-          subtitle="Initial hypotheses, verdict after testing, and the deciding evidence"
-          table={{ columns: ["Hypothesis", "Verdict", "Evidence"], rows: hs.map((h) => [h.h, h.verdict, h.evidence]) }}>
-          <ul className="grid gap-3 md:grid-cols-2">
-            {hs.map((h) => (
-              <li key={h.h} className="rounded-lg border border-line p-4">
-                <div className="flex items-start justify-between gap-3">
-                  <p className="font-medium leading-snug">{h.h}</p>
-                  <span className={`shrink-0 text-[11px] capitalize rounded-md border px-1.5 py-0.5 ${VERDICT[h.verdict]}`}>{h.verdict}</span>
-                </div>
-                <p className="text-sm text-ink-2 mt-2">{h.evidence}</p>
-              </li>
-            ))}
-          </ul>
-        </Exhibit>
+        <section id="tree" className="scroll-mt-20 space-y-4 mt-10">
+          <Takeaway>The question splits into four branches with no overlap; three are fully answered, and the government branch is partly open.</Takeaway>
+          <Exhibit n={2} title="Issue tree: the key question splits into four mutually exclusive branches">
+            <TreeDiagram root={issueTree()} />
+          </Exhibit>
+        </section>
 
-        <Exhibit n={3} title="A six-week plan: diagnose, deep-dive, design solutions, then a roadmap for the steering committee"
+        <section id="hypotheses" className="scroll-mt-20 space-y-4 mt-10">
+          <Takeaway>{wrong} of {hs.length} starting beliefs were wrong or needed refining; that is where the analysis earns its keep.</Takeaway>
+          <Exhibit n={3} title="Hypotheses we started with, and the number that decided each"
+            subtitle="Select a row for the evidence"
+            table={{ columns: ["Hypothesis", "Verdict", "Deciding figure", "Evidence"], rows: hs.map((h) => [h.h, h.verdict, `${h.figure} (${h.figureLabel})`, h.evidence]) }}>
+            <HypothesisScorecard items={hs} />
+          </Exhibit>
+        </section>
+
+        <section id="plan" className="scroll-mt-20 space-y-4 mt-10">
+          <Takeaway>Six weeks: diagnose, deep-dive, design solutions, then a roadmap for the steering committee.</Takeaway>
+        <Exhibit n={4} title="A six-week plan: diagnose, deep-dive, design solutions, then a roadmap for the steering committee"
           subtitle="Workstreams, activities and milestones (diamonds)"
           table={{ columns: ["Workstream", "Activity", "Start week", "End week", "Milestone"], rows: WORKPLAN.map((r) => [r.stream, r.task, r.start, r.end, r.milestone ?? ""]) }}>
           <Plan rows={WORKPLAN} />
         </Exhibit>
+        </section>
 
-        <Exhibit n={4} title="Most producer-level inputs are still estimates; the regulation side of the model is solid"
+        <section id="confidence" className="scroll-mt-20 space-y-4 mt-10">
+          <Takeaway>The regulation side is solid (grade B); most producer-level inputs are still estimates (grade D) until verified declarations are filed in 2027.</Takeaway>
+        <Exhibit n={5} title="Most producer-level inputs are still estimates; the regulation side of the model is solid"
           subtitle={`Every input in the model by confidence grade (${total} inputs) and what would upgrade it`}
           table={{ columns: ["Grade", "What it is", "Inputs", "How to upgrade"], rows: Object.entries(grades).map(([g, n]) => [g, GRADE_TXT[g][0], n, GRADE_TXT[g][1]]) }}>
           <div className="flex h-6 w-full overflow-hidden rounded-md border border-line" role="img" aria-label={`Inputs by confidence grade: ${Object.entries(grades).map(([g, n]) => `${g} ${n}`).join(", ")}`}>
@@ -78,11 +92,9 @@ export default function Approach() {
             ))}
           </dl>
         </Exhibit>
+        </section>
       </div>
-
-      <SectionTitle title="What the client gets at the end of the six weeks">
-        A unit-tested model of the regulation; an exposure diagnosis by producer, route and product; ranked levers with NPV, IRR and real-option timing; a policy position for government; and a sequenced roadmap with owners and KPIs.
-      </SectionTitle>
+      <Toc items={TOC} />
     </div>
   );
 }

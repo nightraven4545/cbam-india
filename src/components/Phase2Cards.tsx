@@ -1,11 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Area, Bar, BarChart, CartesianGrid, ComposedChart, Legend, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Area, Bar, BarChart, CartesianGrid, ComposedChart, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { COMPETITORS, type Producer } from "@/lib/data";
 import { crossoverPrice, deliveredCost, tornado, type Scenario } from "@/lib/model";
 import { DEFAULT_RISK, exposureStats, priceFan, pricePaths } from "@/lib/risk";
 import { AXIS, Card, Slider, TIP, eur, m, pct } from "./ui";
+import { Flag } from "./visual/indicators";
 
 export function TornadoCard({ p, s }: { p: Producer; s: Scenario }) {
   const t = useMemo(() => tornado(p, s), [p, s]);
@@ -82,17 +83,24 @@ export function CrossoverCard({ s }: { s: Scenario }) {
             <XAxis dataKey="price" tick={AXIS} tickFormatter={(v) => `€${v}`} tickLine={false} />
             <YAxis tick={AXIS} tickFormatter={(v) => `€${v}`} tickLine={false} axisLine={false} domain={["auto", "auto"]} />
             <Tooltip {...TIP} labelFormatter={(v) => `Certificate price €${v}/t`} formatter={(v: number) => eur(v)} />
-            <Legend wrapperStyle={{ fontSize: 12 }} />
             {COMPETITORS.map((c, i) => (
               <Line key={c.origin} dataKey={c.origin} stroke={colors[i]} strokeWidth={2} dot={false} strokeDasharray={c.origin.includes("defaults") ? "5 4" : undefined} isAnimationActive={false} />
             ))}
           </LineChart>
         </ResponsiveContainer>
       </div>
+      <ul className="flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-ink-2 mt-2" aria-label="Legend">
+        {COMPETITORS.map((c, i) => (
+          <li key={c.origin} className="inline-flex items-center gap-1.5">
+            <svg width="18" height="6" aria-hidden><line x1="0" y1="3" x2="18" y2="3" stroke={colors[i]} strokeWidth="2.5" strokeDasharray={c.origin.includes("defaults") ? "5 3" : undefined} /></svg>
+            <Flag code={c.flag} size={11} />{c.origin}
+          </li>
+        ))}
+      </ul>
       <ul className="text-sm mt-3 space-y-1">
         {crosses.map(({ c, x }) => (
           <li key={c.origin}>
-            Verified Indian BF-BOF vs <strong>{c.origin}</strong>:{" "}
+            <Flag code="IN" size={11} /> vs <Flag code={c.flag} size={11} /> <strong>{c.origin}</strong>:{" "}
             {x === null ? "no crossover in range" : `costs equalise at ${eur(x)}/tCO₂`}
             {x !== null && (deliveredCost(india, x + 1, s.year, s.regime) > deliveredCost(c, x + 1, s.year, s.regime) ? "; India loses above this price." : "; India wins above this price.")}
           </li>

@@ -73,18 +73,18 @@ export function issueTree(): INode {
   };
 }
 
-export interface Hypothesis { h: string; verdict: "confirmed" | "rejected" | "refined"; evidence: string }
+export interface Hypothesis { h: string; verdict: "confirmed" | "rejected" | "refined"; evidence: string; figure: string; figureLabel: string }
 export function hypotheses(): Hypothesis[] {
   const f = facts();
   return [
-    { h: "2026 is a cheap \"2.5% year\"", verdict: "rejected", evidence: `The 2.5% applies to the benchmark. Verified BF-BOF already pays ${eur(f.verifiedPerT)}/t; defaults pay ${eur(f.defaultPerT)}/t.` },
-    { h: "Verified data is worth more than any furnace upgrade before 2030", verdict: "confirmed", evidence: `${m(f.verification)}/yr for five exporters, against tens of thousands of € per installation to verify.` },
-    { h: "Renewable PPAs cut steel CBAM", verdict: "rejected", evidence: "Iron and steel are charged on direct emissions only (Annex II). PPAs matter for CCTS and buyers, not for CBAM." },
-    { h: "India is cost-competitive in the EU regardless of CBAM", verdict: "refined", evidence: `True only with verified data (until ${eur(f.xEUverified ?? 0)}/tCO₂). On defaults the edge vanishes above ${eur(f.xEUdefault ?? 0)}.` },
-    { h: "Aluminium is the bigger risk than steel", verdict: "refined", evidence: `Today aluminium pays only ${eur(f.alVerified)}/t; if electricity entered scope it would pay ${eur(f.alIndirect)}/t. It is a tail risk, not a current one.` },
-    { h: "Green hydrogen DRI pays back on CBAM savings alone", verdict: "rejected", evidence: `NPV ${eur(f.h2.npvNow)}/t if built in 2026; it only works as a staged option, or with a green premium.` },
-    { h: "CCTS will let India keep the money", verdict: "rejected", evidence: `An intensity scheme pays only on above-target tonnes: ${m(f.polCcts)} kept vs ${bn(f.polExplicit)} with an explicit price.` },
-    { h: "Only large integrated mills are affected", verdict: "rejected", evidence: `Fasteners, tubes and structures (US$${f.dsIn.toFixed(1)}bn) are already in scope, much of it from MSME clusters.` },
+    { h: "2026 is a cheap \"2.5% year\"", verdict: "rejected", figure: `${eur(f.verifiedPerT)}/t`, figureLabel: "verified BF-BOF already pays in 2026", evidence: `The 2.5% applies to the benchmark. Verified BF-BOF already pays ${eur(f.verifiedPerT)}/t; defaults pay ${eur(f.defaultPerT)}/t.` },
+    { h: "Verified data is worth more than any furnace upgrade before 2030", verdict: "confirmed", figure: `${m(f.verification)}/yr`, figureLabel: "value of verified data, five exporters", evidence: `${m(f.verification)}/yr for five exporters, against tens of thousands of € per installation to verify.` },
+    { h: "Renewable PPAs cut steel CBAM", verdict: "rejected", figure: "€0/t", figureLabel: "steel CBAM saving from a PPA today", evidence: "Iron and steel are charged on direct emissions only (Annex II). PPAs matter for CCTS and buyers, not for CBAM." },
+    { h: "India is cost-competitive in the EU regardless of CBAM", verdict: "refined", figure: `${eur(f.xEUdefault ?? 0)}/tCO₂`, figureLabel: "price where India loses to EU mills on defaults", evidence: `True only with verified data (until ${eur(f.xEUverified ?? 0)}/tCO₂). On defaults the edge vanishes above ${eur(f.xEUdefault ?? 0)}.` },
+    { h: "Aluminium is the bigger risk than steel", verdict: "refined", figure: `${eur(f.alVerified)}/t`, figureLabel: "aluminium CBAM today, verified", evidence: `Today aluminium pays only ${eur(f.alVerified)}/t; if electricity entered scope it would pay ${eur(f.alIndirect)}/t. It is a tail risk, not a current one.` },
+    { h: "Green hydrogen DRI pays back on CBAM savings alone", verdict: "rejected", figure: `${eur(f.h2.npvNow)}/t`, figureLabel: "NPV if built in 2026", evidence: `NPV ${eur(f.h2.npvNow)}/t if built in 2026; it only works as a staged option, or with a green premium.` },
+    { h: "CCTS will let India keep the money", verdict: "rejected", figure: m(f.polCcts), figureLabel: "kept in India under CCTS as designed", evidence: `An intensity scheme pays only on above-target tonnes: ${m(f.polCcts)} kept vs ${bn(f.polExplicit)} with an explicit price.` },
+    { h: "Only large integrated mills are affected", verdict: "rejected", figure: `US$${f.dsIn.toFixed(1)}bn`, figureLabel: "MSME-type goods already in scope", evidence: `Fasteners, tubes and structures (US$${f.dsIn.toFixed(1)}bn) are already in scope, much of it from MSME clusters.` },
   ];
 }
 
