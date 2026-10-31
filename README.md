@@ -1,5 +1,7 @@
 # CBAM India: Carbon Border Exposure Model
 
+Live: https://cbam-india.vercel.app
+
 **Which Indian steelmakers lose as Europe prices carbon, and what should they do about it?**
 
 An interactive scenario model of the EU Carbon Border Adjustment Mechanism (definitive regime since 1 Jan 2026) for Indian **steel** (JSW, Tata Steel, AM/NS India, JSPL, SAIL) and **aluminium** (Vedanta, Hindalco, NALCO) exporters, with **cement** (UltraTech, Shree, Dalmia) as a contrast case. It covers:
@@ -19,10 +21,22 @@ An interactive scenario model of the EU Carbon Border Adjustment Mechanism (defi
 - **Decarbonisation lab**: NPV, IRR, payback and MAC for 7 levers, with a dedicated EU line, CCTS credit price and green premium.
 - **Analysis**, a **carbon-markets primer** (EU ETS, PAT/ESCerts, CCTS, CORSIA, VCM, net-zero maths, greenwashing) and a **methodology** page with confidence grades A–E.
 
+## How the site is organised (an MBB-style engagement)
+| Page | Question it answers |
+|---|---|
+| `/` Summary | What is the answer? Governing thought, SCQ, the 2030 cash cliff, value at stake, five recommendations |
+| `/approach` | How did we get there? Issue tree, hypotheses tested, six-week workplan, data confidence |
+| `/industry` | Who is exposed and why? Producer→product Sankey, exposure 2×2, route mix, player profiles |
+| `/model` | What if? Interactive model: exposure, risk, competitiveness, levers, trade and timing tabs |
+| `/roadmap` | What do we do, when, and who owns it? Value-at-stake waterfall, prioritisation matrix, swimlane, KPIs |
+| `/policy` | What should government do? Article 9 simulator, downstream radar, MSME calculator |
+| `/markets` | Carbon-market landscape, EU ETS history, CBAM timeline, primer |
+| `/deck` | Ten chart-led slides, print to PDF |
+
 ## Run
 ```bash
 npm install
-npm test        # 26 tests (incl. Commission example, €277.60/t default cost, optimiser vs brute force)
+npm test        # 30 tests (incl. Commission example, €277.60/t default cost, optimiser vs brute force)
 npm run dev
 ```
 

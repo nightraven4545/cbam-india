@@ -26,7 +26,8 @@ export function Waterfall({ steps, height = 320, fmt = fmtM }: { steps: WStep[];
   });
   const color = (k: string) => (k === "total" ? "var(--neutral)" : k === "down" ? "var(--s3)" : "var(--s2)");
   return (
-    <div style={{ height }}>
+    <div className="overflow-x-auto">
+    <div style={{ height }} className="min-w-[640px]">
       <ResponsiveContainer>
         <BarChart data={data} margin={{ top: 24, left: 4, right: 8, bottom: 4 }}>
           <CartesianGrid vertical={false} stroke="var(--line)" />
@@ -40,6 +41,7 @@ export function Waterfall({ steps, height = 320, fmt = fmtM }: { steps: WStep[];
           </Bar>
         </BarChart>
       </ResponsiveContainer>
+    </div>
     </div>
   );
 }

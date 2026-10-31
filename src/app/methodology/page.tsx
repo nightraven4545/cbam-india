@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { PRODUCERS, LEVERS, PRODUCTS, COMPETITORS, PEER_DEFAULTS, benchmarkFor } from "@/lib/data";
 import { YEARS, cbamFactor, defaultMarkup } from "@/lib/cbam";
+import FormulaFlow from "@/components/consulting/FormulaFlow";
+import { PageHeader } from "@/components/consulting/core";
 
 export const metadata: Metadata = { title: "Methodology · CBAM India", description: "Formulas, rule tables, confidence grades and sources behind the CBAM India model." };
 
@@ -8,8 +10,9 @@ const pct = (n: number) => `${(n * 100).toFixed(1)}%`;
 
 export default function Methodology() {
   return (
+    <div>
+    <div className="mb-10"><PageHeader title="Methodology: one formula from the regulation, unit-tested, with every input graded for confidence" /><FormulaFlow /></div>
     <article className="prose-cbam max-w-3xl">
-      <h1 className="text-3xl font-semibold">Methodology</h1>
 
       <h2>Core formula (definitive period)</h2>
       <p><code>certificates/t = max(0, E_applied − F_t × CSCF_t × B)</code></p>
@@ -116,5 +119,6 @@ export default function Methodology() {
         <li>Producer inputs are estimates. Replace them with verified installation data where available.</li>
       </ul>
     </article>
+    </div>
   );
 }

@@ -4,7 +4,7 @@ Last updated: 31 Oct 2026.
 
 ## Status
 - Repo: github.com/nightraven4545/cbam-india (main).
-- **Vercel: not yet live.** The Vercel connector in Claude sessions returns 403 on project/deployment creation. One-time manual import is needed at vercel.com/new (import nightraven4545/cbam-india, framework Next.js, defaults). After that, every push to main auto-deploys.
+- **Live: https://cbam-india.vercel.app** (imported by the user; the project is not visible to the session's Vercel connector). Pushes to main auto-deploy.
 - Phase 0–1 (steel MVP): done.
 - Phase 2: done.
   - Data hardening: benchmarks checked against the EUR-Lex 2025/2620 table. China/Korea/Türkiye/India aluminium defaults corrected. JSW and SAIL FY26 actuals added (grade C).
@@ -17,6 +17,13 @@ Last updated: 31 Oct 2026.
   - /policy: Article 9 simulator, downstream radar from UN Comtrade 2024 (EU reporter 97, partner India 699), MSME calculator.
   - /deck: 10 live slides, prints to PDF.
 - Tests 26/26, build and lint clean, E2E passed (policy toggle, cement, optimiser, H₂ text, 390 px, deck PDF, no console errors).
+
+- v2 (after user feedback that the pages were text-heavy and bland): consulting-engagement IA and design system.
+  - IBM Plex Sans + Plex Sans Condensed; steel/navy tokens; validated data palette.
+  - Exhibits with action titles, sources and table views.
+  - Pages: Summary, Approach (issue tree, hypotheses, Gantt), Industry (Sankey, 2×2), Roadmap (waterfall, matrix, swimlane, KPIs), and Model in tabs.
+  - Policy (Sankey, treemap) and Markets (landscape, ETS history, timeline, collapsible primer); chart-led deck.
+  - storyline.ts and roadmap.ts compute every quoted number. 30 tests.
 
 ## Next
 - Vercel import (manual, see above).
@@ -35,6 +42,8 @@ Last updated: 31 Oct 2026.
 - Monte Carlo: OU deviation on log price around the scenario path, y_2026 = 0, κ 0.3, σ 30%, seed 42.
 
 ## Gotchas
+- Server pages cannot pass functions to client components (use primitive props, e.g. Ticker prefix/suffix).
+- Wide exhibits (Gantt, swimlane, waterfall) scroll inside their frame on mobile; Exhibit has min-w-0.
 - Many sites are blocked by the session network; fetch them via firecrawl.
 - Producer intensities are D-grade (CCTS plant baselines × 0.85 direct share); see Methodology.
 - Do not `pkill -f` with a pattern that also matches your own shell command.

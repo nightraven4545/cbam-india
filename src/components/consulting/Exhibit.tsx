@@ -10,7 +10,7 @@ export function Exhibit({ n, title, subtitle, source, table, children, controls 
 }) {
   const [asTable, setAsTable] = useState(false);
   return (
-    <figure className="rounded-[10px] border border-line bg-surface p-4 sm:p-6">
+    <figure className="min-w-0 rounded-[10px] border border-line bg-surface p-4 sm:p-6">
       <figcaption className="flex flex-wrap items-start justify-between gap-3">
         <div className="max-w-[70ch]">
           {n !== undefined && <p className="text-xs text-ink-3 mb-1">Exhibit {n}</p>}

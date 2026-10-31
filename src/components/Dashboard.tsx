@@ -11,7 +11,7 @@ import { PageHeader } from "./consulting/core";
 import { CrossoverCard, RiskCard, TornadoCard } from "./Phase2Cards";
 import { H2OptionCard, OptimiserCard } from "./Phase3Cards";
 import { DEFAULT_SCENARIO, cumulativeExposure, leverEconomics, producerSummary, trajectory, type Scenario } from "@/lib/model";
-import { YEARS, cbamFactor, defaultMarkup } from "@/lib/cbam";
+import { cbamFactor, defaultMarkup } from "@/lib/cbam";
 
 const CUSTOM_ID = "custom";
 const URL_KEYS = ["year", "basePrice", "growth", "passThrough", "originCarbonPrice", "fx"] as const;

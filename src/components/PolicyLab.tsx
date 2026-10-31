@@ -7,6 +7,8 @@ import { DEFAULT_SCENARIO } from "@/lib/model";
 import { article9, downstreamCostPerUnit, type Mechanism } from "@/lib/policy";
 import { cbamFactor, defaultMarkup, priceIn } from "@/lib/cbam";
 import { AXIS, Card, Slider, TIP, eur, m, pct } from "./ui";
+import { SankeyChart, TreemapChart } from "./consulting/charts";
+import { PageHeader } from "./consulting/core";
 
 const S = DEFAULT_SCENARIO;
 const usd = (n: number) => `$${Math.round(n).toLocaleString("en-IN")}m`;
@@ -45,6 +47,11 @@ function Article9() {
         <div className="rounded-lg border border-line p-3"><p className="text-xs text-ink-3">Retained in India, 2026–34</p><p className="text-2xl font-semibold">{m(kept)}</p></div>
         <div className="rounded-lg border border-line p-3"><p className="text-xs text-ink-3">Still paid to the EU, 2026–34</p><p className="text-2xl font-semibold">{m(toEU)}</p></div>
       </div>
+      <p className="text-sm font-medium mb-1">Where the 2026–34 CBAM bill goes, € million</p>
+      <SankeyChart height={220} fmt={(v) => `€${Math.round(v).toLocaleString("en-IN")}m`}
+        nodes={[{ name: "CBAM bill on Indian " + sector, color: "var(--ink-2)" }, { name: "Paid to EU budget", color: "var(--s2)" }, { name: "Paid in India (Art. 9)", color: "var(--s1)" }]}
+        links={[{ source: 0, target: 1, value: Math.max(1, toEU / 1e6) }, { source: 0, target: 2, value: Math.max(1, kept / 1e6) }]} />
+      <p className="text-sm font-medium mt-4 mb-1">By year</p>
       <div className="h-64">
         <ResponsiveContainer>
           <BarChart data={data} margin={{ left: 0, right: 12 }}>
@@ -86,7 +93,10 @@ function Radar() {
         <div className="w-56"><Slider label="Year" value={year} min={2026} max={2034} step={1} fmt={String} onChange={setYear} /></div>
         <label className="flex items-center gap-2"><input type="checkbox" checked={adopted} onChange={(e) => setAdopted(e.target.checked)} /> Assume the downstream extension is adopted from 2028 (proposal, not law)</label>
       </div>
-      <div className="overflow-x-auto">
+      <p className="text-sm font-medium mb-1">EU imports from India 2024 by heading, US$ million: blue = already in CBAM, orange = proposed for 2028</p>
+      <TreemapChart height={340} fmt={(v) => `$${Math.round(v).toLocaleString("en-IN")}m`}
+        items={[...DOWNSTREAM].sort((a, b) => b.usdM - a.usdM).map((d) => ({ name: `${d.hs} ${d.product.split(" (")[0].split(",")[0]}`, size: d.usdM, color: d.status === "inScope" ? "#2a78d6" : "#e8590c", sub: d.status === "inScope" ? "in scope" : "2028" }))} />
+      <div className="overflow-x-auto mt-5">
         <table className="w-full text-sm">
           <thead className="text-left text-ink-3"><tr>{["HS", "Product", "EU imports 2024", "kt", "Status", "MSME cluster", "CBAM/yr verified", "CBAM/yr on defaults", "% of value (defaults)"].map((h) => <th key={h} className="py-2 pr-3 font-medium whitespace-nowrap">{h}</th>)}</tr></thead>
           <tbody>
@@ -138,11 +148,8 @@ function MsmeCalc() {
 export default function PolicyLab() {
   return (
     <div className="space-y-6">
-      <header className="space-y-2 max-w-3xl">
-        <p className="text-xs uppercase tracking-wider text-ink-3">Policy & MSMEs</p>
-        <h1 className="text-2xl sm:text-4xl font-semibold leading-tight">What should India do, and who else is exposed?</h1>
-        <p className="text-ink-2">Three tools: how much CBAM revenue India could keep through its own carbon price; which engineering exports CBAM already touches or will touch from 2028; and what it costs a small exporter per unit.</p>
-      </header>
+      <PageHeader title="An explicit Indian carbon price could keep about €1bn of CBAM at home; CCTS as designed keeps almost none, and MSMEs are already exposed"
+        lede="Three tools for government and industry bodies: how much CBAM revenue India could retain through its own carbon price, which engineering exports CBAM already touches or will touch from 2028, and what it costs a small exporter per unit." />
       <Article9 />
       <Radar />
       <MsmeCalc />

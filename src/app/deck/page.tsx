@@ -1,137 +1,112 @@
 import type { Metadata } from "next";
-import { COMPETITORS, PRODUCERS } from "@/lib/data";
-import { DEFAULT_SCENARIO as S, crossoverPrice, cumulativeExposure, leverEconomics, producerSummary, tornado, trajectory } from "@/lib/model";
-import { DEFAULT_RISK, exposureStats, pricePaths } from "@/lib/risk";
-import { article9 } from "@/lib/policy";
-import { DEFAULT_H2, h2Option } from "@/lib/options";
-import { DOWNSTREAM, LEVERS } from "@/lib/data";
+import CliffChart from "@/components/pages/CliffChart";
+import MiniWaterfall from "@/components/pages/MiniWaterfall";
+import { ExposureMatrix, Flows, Footprint, GapChart } from "@/components/pages/IndustryCharts";
+import { Prioritisation } from "@/components/pages/RoadmapCharts";
+import FormulaFlow from "@/components/consulting/FormulaFlow";
+import { EU_STEEL_BY_CN, EU_STEEL_TOTAL_KT, PRODUCERS, benchmarkFor } from "@/lib/data";
+import { DEFAULT_SCENARIO as S, producerCost } from "@/lib/model";
+import { cbamFactor } from "@/lib/cbam";
+import { annualBill } from "@/lib/roadmap";
+import { facts, initiatives } from "@/lib/storyline";
 
-export const metadata: Metadata = { title: "Executive deck · CBAM India", description: "Ten-slide executive summary of EU CBAM exposure for Indian steel and aluminium, generated from the live model." };
+export const metadata: Metadata = { title: "Executive deck", description: "Ten-slide executive summary of the CBAM India engagement, generated from the live model." };
 
-const eur = (n: number) => `€${Math.round(n).toLocaleString("en-IN")}`;
-const m = (n: number) => `€${Math.round(n / 1e6).toLocaleString("en-IN")}m`;
-const bn = (n: number) => `€${(n / 1e9).toFixed(1)}bn`;
+const SECTIONS = ["Situation", "Diagnosis", "Solutions", "Roadmap"] as const;
 
-function Slide({ n, title, children }: { n: number; title: string; children: React.ReactNode }) {
+function Slide({ n, section, title, source, children }: { n: number; section: (typeof SECTIONS)[number]; title: string; source?: string; children: React.ReactNode }) {
   return (
-    <section className="slide relative mx-auto mb-8 w-full max-w-5xl rounded-xl border border-line bg-surface p-6 sm:p-10 aspect-auto sm:aspect-[16/9] flex flex-col">
-      <h2 className="text-xl sm:text-2xl font-semibold leading-snug max-w-4xl">{title}</h2>
-      <div className="mt-5 flex-1 text-sm sm:text-base text-ink-2 [&_strong]:text-ink">{children}</div>
-      <p className="mt-4 text-[10px] text-ink-3 flex justify-between"><span>CBAM India · model as of 31 Oct 2026 · grade-D producer inputs</span><span>{n}/10</span></p>
+    <section className="slide mx-auto mb-8 w-full max-w-[1100px] rounded-[10px] border border-line bg-surface p-6 sm:p-9 flex flex-col">
+      <div className="flex items-center justify-between gap-4 text-xs text-ink-3">
+        <ol className="flex gap-3" aria-label="Deck sections">{SECTIONS.map((s) => <li key={s} className={s === section ? "text-ink font-medium border-b-2 border-ink pb-0.5" : ""}>{s}</li>)}</ol>
+        <span>{n} / 10</span>
+      </div>
+      <h2 className="font-cond text-[1.55rem] sm:text-[1.8rem] leading-tight font-semibold mt-4 max-w-[46ch]">{title}</h2>
+      <div className="mt-5 flex-1">{children}</div>
+      {source && <p className="text-[11px] text-ink-3 mt-4">Source: {source}</p>}
     </section>
   );
 }
 
-const Big = ({ v, k }: { v: string; k: string }) => (
-  <div className="rounded-lg border border-line p-4"><p className="text-2xl sm:text-3xl font-semibold text-ink">{v}</p><p className="text-xs mt-1">{k}</p></div>
-);
-
 export default function Deck() {
+  const f = facts();
+  const { eur, m, bn } = f.fmt;
   const full = { ...S, passThrough: 1 };
   const steel = PRODUCERS.filter((p) => p.sector === "steel");
-  const rows = steel.map((p) => ({ p, r: producerSummary(p, full), t: trajectory(p, full), cum: cumulativeExposure(p, full, "actual") }));
-  const verif = rows.reduce((a, x) => a + x.r.verificationValue, 0);
-  const jsw = steel[0];
-  const paths = pricePaths(S, DEFAULT_RISK);
-  const ra = exposureStats(jsw, S, "actual", paths), rd = exposureStats(jsw, S, "default", paths);
-  const tor = tornado(jsw, S);
-  const [iv, idf] = COMPETITORS;
-  const eu = COMPETITORS.find((c) => c.origin.startsWith("EU"))!;
-  const xv = crossoverPrice(iv, eu, 2026, "law"), xd = crossoverPrice(idf, eu, 2026, "law");
-  const vedanta = PRODUCERS.find((p) => p.id === "vedanta")!;
-  const alA = producerSummary(vedanta, full), alI = producerSummary(vedanta, { ...full, includeIndirect: true });
-  const tata = PRODUCERS.find((p) => p.id === "tata")!;
-  const lev = LEVERS.filter((l) => l.sector === "steel").map((l) => ({ l, e: leverEconomics(tata, l, S, { dedicatedEU: false, cctsPrice: 0, greenPremium: 0, discount: 0.1 }) }));
-  const pol = (mech: "explicit" | "ccts") => article9(S, "steel", { price: 20, mechanism: mech, targetCut: 0.05, qualifying: 0.6 }).reduce((a, r) => a + r.retained, 0);
-  const h2 = h2Option(S, DEFAULT_H2), h2p = h2Option(S, { ...DEFAULT_H2, greenPremium: 150 });
-  const dsUsd = (st: "inScope" | "proposed") => DOWNSTREAM.filter((d) => d.status === st).reduce((a, d) => a + d.usdM, 0) / 1000;
-  const firstEx = (r: typeof h2) => r.thresholds.find((t) => t.price !== null);
+  const names = steel.map((p) => p.name);
+  const others = EU_STEEL_TOTAL_KT - steel.reduce((a, p) => a + p.euVolume.value * 1000, 0);
+  const left = [...steel.map((p) => ({ name: p.name, kt: p.euVolume.value * 1000 })), { name: "Other Indian mills", kt: others }];
+  const nodes = [...left.map((l) => ({ name: l.name, color: "var(--ink-2)" })), { name: "EU border (CBAM)", color: "var(--s2)" }, ...EU_STEEL_BY_CN.map((c) => ({ name: c.cn, color: "var(--s1)" }))];
+  const links = [...left.map((l, i) => ({ source: i, target: left.length, value: l.kt })), ...EU_STEEL_BY_CN.map((c, i) => ({ source: left.length, target: left.length + 1 + i, value: c.kt }))];
+  const points = steel.map((p) => { const x = producerCost(p, full, "actual", { year: 2030 }).net; return { name: p.name, x, y: p.ebitdaEUR.value, z: p.euVolume.value, tone: (x > 150 ? "s2" : "s1") as "s1" | "s2" }; });
+  const gap = steel.map((p) => { const b = benchmarkFor(p), e = p.actualDirect.value, f26 = cbamFactor(2026) * b, f30 = cbamFactor(2030) * b; return { name: p.name, covered2026: +Math.min(e, f26).toFixed(2), gap2026: +Math.max(0, e - f26).toFixed(2), covered2030: +Math.min(e, f30).toFixed(2), gap2030: +Math.max(0, e - f30).toFixed(2) }; });
+  const foot = PRODUCERS.filter((p) => p.sector !== "steel").map((p) => ({ name: p.name, charged: p.sector === "cement" ? p.actualDirect.value + p.indirect.value : p.actualDirect.value, uncharged: p.sector === "cement" ? 0 : p.indirect.value }));
+  const ins = initiatives();
+  const TONE = { Company: "s1", Government: "s2", "MSME clusters": "s3" } as const;
+  const pts = ins.map((x, i) => ({ name: `${i + 1}. ${x.name}`, label: String(i + 1), x: x.ease, y: Math.log10(Math.max(10, x.impact)), z: 1, tone: TONE[x.owner] }));
+  const share = Math.round((-f.vas.steps[1].value / f.vas.doNothing) * 100);
 
   return (
-    <div className="deck">
-      <p className="text-sm text-ink-3 mb-6 print:hidden">Print or save as PDF (Ctrl/Cmd + P, landscape) for a slide-per-page deck. Every number is computed live from the model.</p>
+    <div>
+      <p className="text-sm text-ink-3 mb-6 print:hidden">Ten slides generated from the live model. Print or save as PDF (Ctrl/Cmd + P, landscape) for one slide per page.</p>
 
-      <Slide n={1} title="EU CBAM is now a cash cost on Indian steel. Most of it is a tax on missing data, and from 2030 a tax on the blast furnace.">
-        <div className="grid gap-4 sm:grid-cols-3">
-          <Big v={eur(rows[1].r.def.net) + "/t"} k="2026 CBAM on Indian HR coil using EU default values" />
-          <Big v={eur(rows[1].r.act.net) + "/t"} k="The same tonne, verified, from India's most efficient BF-BOF" />
-          <Big v={m(verif) + "/yr"} k="What verified data is worth to EU buyers of the 5 largest exporters" />
+      <Slide n={1} section="Situation" title={`CBAM will cost India's five largest steel exporters ${bn(f.vas.doNothing)} by 2034 if they do nothing; ${share}% of it is a tax on missing data`}>
+        <div className="grid gap-6 sm:grid-cols-3">
+          {[[eur(f.defaultPerT) + "/t", "2026 CBAM on Indian hot-rolled coil on EU default values", "text-s2"], [eur(f.verifiedPerT) + "/t", "The same tonne, verified, from India's most efficient BF-BOF", "text-s1"], [m(f.verification) + "/yr", "What verified data is worth to EU buyers of the five largest exporters", "text-s3"]].map(([v, k, c]) => (
+            <div key={k} className="border-t-2 border-ink pt-3"><p className={`font-cond text-4xl font-semibold ${c}`}>{v}</p><p className="text-sm text-ink-2 mt-2">{k}</p></div>
+          ))}
         </div>
-        <p className="mt-5">Free allocation falls from 77.5% (2029) to 51.5% (2030) and to 0% (2034). Even verified BF-BOF steel then pays {eur(Math.min(...rows.map((x) => x.t[8].actual)))}–{eur(Math.max(...rows.map((x) => x.t[8].actual)))}/t.</p>
-      </Slide>
-
-      <Slide n={2} title="The mechanism: the 2.5% phase-out in 2026 applies to the benchmark, not to emissions, so the gap above the benchmark is priced in full from day one">
-        <p className="font-mono text-ink">certificates/t = max(0, E − F<sub>t</sub> × B) · cost = certificates × P − Art. 9 credit</p>
-        <ul className="list-disc pl-5 mt-4 space-y-1">
-          <li>F<sub>t</sub> (CBAM factor): 97.5% → 95% → 90% → 77.5% → <strong>51.5% (2030)</strong> → 39% → 26.5% → 14% → 0% (2034)</li>
-          <li>Unverified goods use India&apos;s default (4.28 t for HR flat) plus a 10% / 20% / 30% mark-up (2026 / 2027 / 2028+)</li>
-          <li>Steel and aluminium are charged on direct emissions only; cement also on electricity</li>
-          <li>The EU importer pays; the exporter bears it through price (modelled as a pass-through share)</li>
-        </ul>
-      </Slide>
-
-      <Slide n={3} title="Exposure differs sharply by producer: coal-DRI and mixed-route mills get the smallest free allocation">
-        <table className="w-full text-sm">
-          <thead className="text-left text-ink-3"><tr><th>Producer</th><th>Verified t/t</th><th>2026 €/t</th><th>2030 €/t</th><th>2026–34 cum. (100% pass-through)</th></tr></thead>
-          <tbody>{rows.map(({ p, r, t, cum }) => <tr key={p.id} className="border-t border-line"><td className="py-1">{p.name}</td><td>{p.actualDirect.value}</td><td>{eur(r.act.net)}</td><td>{eur(t[4].actual)}</td><td>{m(cum)}</td></tr>)}</tbody>
-        </table>
-      </Slide>
-
-      <Slide n={4} title="Verification is the highest-return lever in the sector, and it also cuts tail risk">
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Big v={`${m(ra.p50)} → ${m(ra.cvar95)}`} k="JSW 2026–34 exposure with verified data: median → worst-5% average (50% pass-through)" />
-          <Big v={`${m(rd.p50)} → ${m(rd.cvar95)}`} k="The same on EU default values" />
+        <div className="grid gap-px mt-8 rounded-lg border border-line bg-line overflow-hidden sm:grid-cols-3 text-sm">
+          {[["Situation", "EU importers have paid CBAM since 1 Jan 2026 at the EU carbon price (€82.32/t, Q3)."], ["Complication", "Free allocation goes to zero by 2034; unverified goods pay India's default plus up to 30%."], ["Question", "How should producers and the state respond, and in what order?"]].map(([k, v]) => <div key={k} className="bg-surface p-3"><p className="font-semibold">{k}</p><p className="text-ink-2">{v}</p></div>)}
         </div>
-        <p className="mt-4">{DEFAULT_RISK.n.toLocaleString()} mean-reverting carbon-price paths (σ {Math.round(DEFAULT_RISK.sigma * 100)}%). The biggest driver of exposure is <strong>{tor.rows[0].driver.replace(" ±20%", "").toLowerCase()}</strong>, which management controls, ahead of the EU price, which it does not.</p>
       </Slide>
 
-      <Slide n={5} title="Competitiveness: default values erase India's cost edge over EU mills, while verified data keeps it">
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Big v={xd ? eur(xd) + "/tCO₂" : "n/a"} k="Price above which Indian coil on defaults costs more delivered than EU-made BF-BOF coil (today ≈ €82)" />
-          <Big v={xv ? eur(xv) + "/tCO₂" : "n/a"} k="The same crossover with verified Indian data" />
+      <Slide n={2} section="Situation" title="The 2.5% phase-out in 2026 applies to the benchmark, not to emissions, so the gap above the benchmark is charged in full from day one" source="Regulation (EU) 2023/956; Implementing Regs. 2025/2620, 2025/2621 (2026/1740).">
+        <FormulaFlow />
+        <p className="text-sm text-ink-2 mt-6">CBAM factor F<sub>t</sub>: 97.5% (2026) → 95% → 90% → 77.5% → <strong className="text-ink">51.5% (2030)</strong> → 39% → 26.5% → 14% → 0% (2034). Steel and aluminium count direct emissions only; cement also counts electricity.</p>
+      </Slide>
+
+      <Slide n={3} section="Diagnosis" title="The bill steepens from 2030, when free allocation drops from 77.5% to 51.5%" source="Model; volumes and intensities grade D.">
+        <CliffChart verified={annualBill("actual")} defaults={annualBill("default")} names={names} />
+      </Slide>
+
+      <Slide n={4} section="Diagnosis" title="Five producers ship about 90% of India's CBAM steel to the EU, mostly coated and hot-rolled flat products" source="Eurostat Comext 2025 (product split); ARE and estimates (producer split).">
+        <Flows nodes={nodes} links={links} />
+      </Slide>
+
+      <Slide n={5} section="Diagnosis" title="Route matters as much as intensity: DRI-heavy and thin-margin producers are the most exposed by 2030" source="Model at €82.32 growing 3%/yr; EBITDA FY26 results and estimates.">
+        <ExposureMatrix points={points} xMid={150} yMid={100} />
+      </Slide>
+
+      <Slide n={6} section="Diagnosis" title="By 2030 every producer pays on more than half of its emissions, and aluminium's electricity is the tail risk" source="Implementing Reg. 2025/2620 benchmarks; intensities grade D.">
+        <GapChart data={gap} />
+        <div className="mt-4"><Footprint data={foot} /></div>
+      </Slide>
+
+      <Slide n={7} section="Solutions" title={`Five moves cut the 2026–34 bill from ${bn(f.vas.doNothing)} to ${bn(f.vas.residual)}; verification does ${share}% of the work`} source="Model; moves applied in sequence.">
+        <MiniWaterfall steps={f.vas.steps} height={380} />
+      </Slide>
+
+      <Slide n={8} section="Solutions" title={f.h2first ? `Hydrogen DRI is an option, not a project: worth ${eur(f.h2.optionValue)}/t, exercise from ${f.h2first.year} only above ${eur(f.h2first.price!)}/t` : "Hydrogen DRI is an option, not a project"} source="Binomial real-option model; IEA cost ranges (grade D).">
+        <div className="grid gap-6 sm:grid-cols-3">
+          {[[eur(f.h2.npvNow) + "/t", "NPV if built in 2026 on a dedicated EU line"], [eur(f.h2.optionValue) + "/t", "Value of keeping the option to build any year to 2034"], [f.h2first ? `${f.h2first.year}` : "never", "Earliest year it is optimal to build at current inputs"]].map(([v, k]) => (
+            <div key={k} className="border-t-2 border-ink pt-3"><p className="font-cond text-4xl font-semibold">{v}</p><p className="text-sm text-ink-2 mt-2">{k}</p></div>
+          ))}
         </div>
-        <p className="mt-4">Türkiye&apos;s EAF-heavy, short-haul steel beats India at almost any carbon price; Korea is a close substitute. A 2.8 Mt EU tariff-rate quota (50% duty above it) now caps volume as well.</p>
+        <p className="text-ink-2 mt-6 max-w-[70ch]">Stay H₂-ready (gas-DRI shafts, site and power); let the certificate price and a buyer premium trigger the switch. Routing EU orders to the cleanest plant is worth {m(f.optUplift)}/yr for JSW in 2030 at no capex.</p>
       </Slide>
 
-      <Slide n={6} title="Aluminium: a small bill today, an existential one if electricity is ever brought into scope">
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Big v={eur(alA.act.net) + "/t"} k="Vedanta 2026 CBAM, verified (anode + PFC only)" />
-          <Big v={eur(alI.act.net) + "/t"} k="The same if captive-coal power emissions were charged (EBITDA ≈ €750/t)" />
-        </div>
-        <p className="mt-4">So renewable power for smelters is best valued as <strong>insurance on future CBAM scope</strong>. On today&apos;s rules it has negative NPV and zero CBAM benefit.</p>
+      <Slide n={9} section="Roadmap" title="Quick wins are verification, contracts, routing and verifier capacity; hydrogen and the FTA are staged bets" source="Model values for initiatives 1, 3, 4, 5, 7; others estimated.">
+        <Prioritisation points={pts} />
       </Slide>
 
-      <Slide n={7} title="Decarbonisation levers: efficiency pays now; deep levers need a dedicated EU line, a premium or a domestic carbon price">
-        <table className="w-full text-sm">
-          <thead className="text-left text-ink-3"><tr><th>Lever (Tata Steel, plant-wide)</th><th>NPV €/t</th><th>MAC €/tCO₂</th><th>Steel CBAM?</th></tr></thead>
-          <tbody>{lev.map(({ l, e }) => <tr key={l.id} className="border-t border-line"><td className="py-1">{l.name}</td><td>{eur(e.npv)}</td><td>{e.mac === null ? "–" : eur(e.mac)}</td><td>{e.cbamRelevant ? "yes" : "no"}</td></tr>)}</tbody>
-        </table>
-      </Slide>
-
-      <Slide n={8} title="Hydrogen DRI is a real option: wait, keep it ready, and let the carbon price and buyers trigger it">
-        <div className="grid gap-4 sm:grid-cols-3">
-          <Big v={eur(h2.npvNow) + "/t"} k="NPV if built in 2026 (dedicated EU line, no premium)" />
-          <Big v={eur(h2.optionValue) + "/t"} k="Value of the option to build any year to 2034" />
-          <Big v={firstEx(h2p) ? `${firstEx(h2p)!.year}` : "never"} k={`Earliest optimal build with a €150/t green premium${firstEx(h2p) ? ` (price ≥ ${eur(firstEx(h2p)!.price!)})` : ""}`} />
-        </div>
-        <p className="mt-4">Build H₂-ready DRI shafts (gas first) now; switch fuel when green H₂ and the carbon price cross the threshold.</p>
-      </Slide>
-
-      <Slide n={9} title="Policy: how India prices carbon decides whether CBAM revenue goes to Brussels or stays in India">
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Big v={bn(pol("explicit"))} k="Steel CBAM retained in India 2026–34 with an explicit €20/t carbon price (60% of exports with accepted evidence)" />
-          <Big v={m(pol("ccts"))} k="The same price under CCTS as designed (only the above-target slice pays)" />
-        </div>
-        <p className="mt-4">MSMEs are already exposed: fasteners, tubes, structures and other metal articles (US${dsUsd("inScope").toFixed(1)}bn of EU imports from India in 2024) are in scope today; the 2028 proposal would add headings worth US${dsUsd("proposed").toFixed(1)}bn (machinery and auto parts; only some lines).</p>
-      </Slide>
-
-      <Slide n={10} title="Recommendations">
-        <ol className="list-decimal pl-5 space-y-2">
-          <li><strong>Now:</strong> install CBAM-grade MRV with accredited verification for every EU-supplying installation; pass verified data down to MSME buyers.</li>
-          <li><strong>Now:</strong> rewrite EU contracts with CBAM cost-sharing indexed to the certificate price and a verified-intensity warranty.</li>
-          <li><strong>2026–29:</strong> run the negative-cost efficiency stack; route the lowest-carbon plants to EU contracts.</li>
-          <li><strong>Before 2030:</strong> stage H₂-ready DRI as a real option; price green premia into EU offtakes.</li>
-          <li><strong>Government:</strong> make CCTS an explicit, Article 9-creditable price on exports; build verifier capacity; negotiate recognition and a phased downstream scope in the India–EU FTA.</li>
+      <Slide n={10} section="Roadmap" title={`Government's lever: an explicit, Article 9-creditable carbon price keeps ${bn(f.polExplicit)} in India; CCTS as designed keeps ${m(f.polCcts)}`}>
+        <ol className="list-decimal pl-5 space-y-2 text-ink-2">
+          <li><strong className="text-ink">Now:</strong> verify every EU-bound tonne; index CBAM cost-sharing in EU contracts; route EU orders to the cleanest plants.</li>
+          <li><strong className="text-ink">2026–29:</strong> run the efficiency, scrap and biochar stack before the 2030 cliff; share verified data with MSME buyers.</li>
+          <li><strong className="text-ink">2030+:</strong> exercise the H₂-DRI option when the price and premium triggers are met.</li>
+          <li><strong className="text-ink">Government:</strong> an explicit carbon price on exported embedded carbon; national verifier capacity; CCTS recognition and a phased downstream scope in the India–EU FTA.</li>
+          <li><strong className="text-ink">MSMEs:</strong> US${f.dsIn.toFixed(1)}bn of goods are already in scope; cluster MRV desks in Ludhiana, Rajkot and Moradabad.</li>
         </ol>
       </Slide>
     </div>

@@ -28,7 +28,7 @@ export default function CliffChart({ verified, defaults, names }: { verified: Re
             <YAxis tick={AXIS} tickFormatter={(v) => `€${v}m`} tickLine={false} axisLine={false} width={64} />
             <Tooltip {...TIP} formatter={(v: number, n: string) => [`€${v.toLocaleString("en-IN")}m`, n]} />
             <Legend iconType="square" wrapperStyle={{ fontSize: 12 }} formatter={(v) => <span style={{ color: "var(--ink-2)" }}>{v}</span>} />
-            <ReferenceLine x={2030} stroke="var(--ink)" strokeDasharray="4 3" label={{ value: "2030: free allocation 77.5% → 51.5%", position: "insideTopLeft", fill: "var(--ink)", fontSize: 12 }} />
+            <ReferenceLine x={2030} stroke="var(--ink)" strokeDasharray="4 3" label={{ value: "2030 cliff: 77.5% → 51.5%", position: "insideTopLeft", fill: "var(--ink)", fontSize: 12 }} />
             {names.map((n, i) => (
               <Area key={n} type="monotone" dataKey={n} stackId="1" stroke={FILLS[i]} strokeWidth={0.5} fill={FILLS[i]} fillOpacity={0.9} isAnimationActive={false} />
             ))}
