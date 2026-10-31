@@ -9,6 +9,7 @@ import { DEFAULT_SCENARIO as S, producerCost } from "@/lib/model";
 import { cbamFactor } from "@/lib/cbam";
 import { annualBill } from "@/lib/roadmap";
 import { facts, initiatives } from "@/lib/storyline";
+import Presenter from "@/components/Presenter";
 
 export const metadata: Metadata = { title: "Executive deck", description: "Ten-slide executive summary of the CBAM India engagement, generated from the live model." };
 
@@ -50,6 +51,7 @@ export default function Deck() {
     <div>
       <p className="text-sm text-ink-3 mb-6 print:hidden">Ten slides generated from the live model. Print or save as PDF (Ctrl/Cmd + P, landscape) for one slide per page.</p>
 
+      <Presenter>
       <Slide n={1} section="Situation" title={`CBAM will cost India's five largest steel exporters ${bn(f.vas.doNothing)} by 2034 if they do nothing; ${share}% of it is a tax on missing data`}>
         <div className="grid gap-6 sm:grid-cols-3">
           {[[eur(f.defaultPerT) + "/t", "2026 CBAM on Indian hot-rolled coil on EU default values", "text-s2i"], [eur(f.verifiedPerT) + "/t", "The same tonne, verified, from India's most efficient BF-BOF", "text-s1i"], [m(f.verification) + "/yr", "What verified data is worth to EU buyers of the five largest exporters", "text-s3i"]].map(([v, k, c]) => (
@@ -109,6 +111,7 @@ export default function Deck() {
           <li><strong className="text-ink">MSMEs:</strong> US${f.dsIn.toFixed(1)}bn of goods are already in scope; cluster MRV desks in Ludhiana, Rajkot and Moradabad.</li>
         </ol>
       </Slide>
+      </Presenter>
     </div>
   );
 }

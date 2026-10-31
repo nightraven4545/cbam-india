@@ -8,9 +8,15 @@ import "@fontsource/ibm-plex-sans-condensed/700.css";
 import "./globals.css";
 import Nav from "@/components/Nav";
 
+const DESC = "An engagement-style analysis of the EU Carbon Border Adjustment Mechanism for Indian steel, aluminium and cement: exposure, levers, policy and a roadmap.";
 export const metadata: Metadata = {
+  metadataBase: new URL("https://cbam-india.vercel.app"),
   title: { default: "CBAM India: what Europe's carbon border costs Indian industry", template: "%s · CBAM India" },
-  description: "An engagement-style analysis of the EU Carbon Border Adjustment Mechanism for Indian steel, aluminium and cement: exposure, levers, policy and a roadmap.",
+  description: DESC,
+  alternates: { canonical: "/" },
+  openGraph: { type: "website", siteName: "CBAM India", url: "https://cbam-india.vercel.app", description: DESC },
+  twitter: { card: "summary_large_image", description: DESC },
+  authors: [{ name: "Shreshtha", url: "https://github.com/nightraven4545" }],
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

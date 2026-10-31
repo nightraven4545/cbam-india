@@ -25,10 +25,16 @@ Last updated: 31 Oct 2026.
   - Policy (Sankey, treemap) and Markets (landscape, ETS history, timeline, collapsible primer); chart-led deck.
   - storyline.ts and roadmap.ts compute every quoted number. 30 tests.
 
+- v3:
+  - Data hardened from primary sources (EUR-Lex 2026/1740 defaults; FY26 disclosures for Tata, JSPL, AM/NS, Vedanta, Hindalco).
+  - /sources registry; model presets; zero axe WCAG AA violations (light and dark).
+  - Excel model (static route, live formulas); case study; OG image; one-page PDF (public/); deck Present mode.
+  - 33 tests.
+
 ## Next
 - Vercel import (manual, see above).
 - Q4 2026 price on 4 Jan 2027; weekly prices from 2027.
-- Verify India defaults for 7209/7210 and add product mix.
+- India defaults for 7209/7210 equal 7208 (4.280), so product mix only matters via benchmarks (not modelled).
 - Replace D-grade plant intensities with verified CBAM data as it is published.
 - Downstream radar at the 8-digit level once the final 2028 list is adopted.
 
@@ -42,6 +48,7 @@ Last updated: 31 Oct 2026.
 - Monte Carlo: OU deviation on log price around the scenario path, y_2026 = 0, κ 0.3, σ 30%, seed 42.
 
 ## Gotchas
+- After editing /one-pager, regenerate public/CBAM-India-one-pager.pdf (Playwright pdf of the built page).
 - Server pages cannot pass functions to client components (use primitive props, e.g. Ticker prefix/suffix).
 - Wide exhibits (Gantt, swimlane, waterfall) scroll inside their frame on mobile; Exhibit has min-w-0.
 - Many sites are blocked by the session network; fetch them via firecrawl.

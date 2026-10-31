@@ -1,6 +1,8 @@
 # CBAM India: Carbon Border Exposure Model
 
-Live: https://cbam-india.vercel.app
+Live: https://cbam-india.vercel.app · [Case study](https://cbam-india.vercel.app/case-study) · [One-page PDF](https://cbam-india.vercel.app/CBAM-India-one-pager.pdf) · [Excel model](https://cbam-india.vercel.app/cbam-india-model.xlsx)
+
+![Summary](docs/screenshots/summary-desktop.png)
 
 **Which Indian steelmakers lose as Europe prices carbon, and what should they do about it?**
 
@@ -31,12 +33,19 @@ An interactive scenario model of the EU Carbon Border Adjustment Mechanism (defi
 | `/roadmap` | What do we do, when, and who owns it? Value-at-stake waterfall, prioritisation matrix, swimlane, KPIs |
 | `/policy` | What should government do? Article 9 simulator, downstream radar, MSME calculator |
 | `/markets` | Carbon-market landscape, EU ETS history, CBAM timeline, primer |
-| `/deck` | Ten chart-led slides, print to PDF |
+| `/deck` | Ten chart-led slides with Present mode (← →), print to PDF |
+| `/sources` | Every source with confidence grade and law/proposal status |
+| `/case-study` | Three-minute write-up: problem, approach, insights, next steps |
+| `/cbam-india-model.xlsx` | Excel model with live formulas (Inputs, Rules, Calc, Outputs) |
+
+| Industry (dark mode) | Roadmap | Mobile |
+|---|---|---|
+| ![Industry](docs/screenshots/industry-dark.png) | ![Roadmap](docs/screenshots/roadmap-desktop.png) | ![Mobile](docs/screenshots/summary-mobile.png) |
 
 ## Run
 ```bash
 npm install
-npm test        # 30 tests (incl. Commission example, €277.60/t default cost, optimiser vs brute force)
+npm test        # 33 tests (incl. Commission example, €277.60/t default cost, optimiser vs brute force)
 npm run dev
 ```
 

@@ -14,6 +14,7 @@ const NAV = [
   { href: "/deck", label: "Deck" },
   { href: "/methodology", label: "Methodology" },
   { href: "/sources", label: "Sources" },
+  { href: "/case-study", label: "Case study" },
 ];
 
 export default function Nav() {
