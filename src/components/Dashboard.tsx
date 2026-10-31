@@ -181,6 +181,7 @@ export default function Dashboard() {
             <span>Stress test: charge indirect (electricity) emissions too<span className="block text-xs text-ink-3">Not law for steel or aluminium today; it is under review.</span></span>
           </label>
           <button onClick={copyLink} className="w-full rounded-md border border-line py-1.5 text-sm hover:bg-bg">{copied ? "Link copied ✓" : "Copy link to this scenario"}</button>
+          <a href="/cbam-india-model.xlsx" download className="block w-full rounded-md bg-ink text-bg py-1.5 text-sm text-center font-medium">Download the Excel model</a>
           <p className="text-xs text-ink-3">{s.year}: CBAM factor {pct(cbamFactor(s.year, s.regime))} · default mark-up {pct(defaultMarkup(s.year))} · price {eur(price, 2)}</p>
         </aside>
 

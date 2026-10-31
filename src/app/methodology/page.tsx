@@ -11,7 +11,7 @@ const pct = (n: number) => `${(n * 100).toFixed(1)}%`;
 export default function Methodology() {
   return (
     <div>
-    <div className="mb-10"><PageHeader title="Methodology: one formula from the regulation, unit-tested, with every input graded for confidence" /><FormulaFlow /></div>
+    <div className="mb-10"><PageHeader title="Methodology: one formula from the regulation, unit-tested, with every input graded for confidence" /><FormulaFlow /><p className="text-sm text-ink-2 mt-4">The same formula in a spreadsheet you can audit: <a href="/cbam-india-model.xlsx" download className="text-s1i underline underline-offset-2">download the Excel model</a> (Inputs, Rules, Calc with live formulas, Outputs).</p></div>
     <article className="prose-cbam max-w-3xl">
 
       <h2>Core formula (definitive period)</h2>
