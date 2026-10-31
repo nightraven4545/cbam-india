@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If you use this analysis or model, please cite it as below."
+title: "CBAM India: what Europe's carbon border costs Indian steel, aluminium and cement"
+authors:
+  - name: "Shreshtha"
+    website: "https://github.com/nightraven4545"
+date-released: 2026-10-31
+url: "https://cbam-india.vercel.app"
+repository-code: "https://github.com/nightraven4545/cbam-india"
+keywords:
+  - CBAM
+  - carbon border adjustment mechanism
+  - India
+  - steel
+  - aluminium
+  - cement
+  - carbon pricing
+  - EU ETS
+  - CCTS
+  - green steel
+type: software

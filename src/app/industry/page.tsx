@@ -3,11 +3,11 @@ import Link from "next/link";
 import { PageHeader, Panel } from "@/components/consulting/core";
 import { Company } from "@/components/visual/Logo";
 import { Exhibit } from "@/components/consulting/Exhibit";
-import { ExposureMatrix, Flows, Footprint, GapChart, RouteMix, Spark } from "@/components/pages/IndustryCharts";
+import { Flows, Footprint, RouteMix, Spark } from "@/components/pages/IndustryCharts";
 import { EU_STEEL_BY_CN, EU_STEEL_TOTAL_KT, PRODUCERS, benchmarkFor } from "@/lib/data";
 import { DEFAULT_SCENARIO as S, producerCost, producerSummary, trajectory } from "@/lib/model";
 import { YEARS, cbamFactor } from "@/lib/cbam";
-import { FootballField, Heatmap, Mekko } from "@/components/consulting/exhibits";
+import { AllocationBars, FootballField, Heatmap, Mekko, RiskMatrix, allocSplit } from "@/components/consulting/exhibits";
 import { EU_FLAT_IMPORTS_2025, FIELD_SCENARIOS, footballField, mekko } from "@/lib/exhibits";
 
 export const metadata: Metadata = { title: "Industry & players", description: "Who is exposed to EU CBAM among Indian steel, aluminium and cement producers, and why." };
@@ -26,7 +26,7 @@ export default function Industry() {
   const hub = left.length;
   const links = [...left.map((l, i) => ({ source: i, target: hub, value: l.kt })), ...EU_STEEL_BY_CN.map((c, i) => ({ source: hub, target: hub + 1 + i, value: c.kt }))];
 
-  const points = rows.map(({ p, c2030 }) => ({ name: p.name, x: c2030, y: p.ebitdaEUR.value, z: p.euVolume.value, tone: (c2030 > 150 ? "s2" : "s1") as "s1" | "s2" }));
+  const points = rows.map(({ p, t, c2030 }) => ({ id: p.id, name: p.name, x: c2030, x2026: t[0].actual, x2030: c2030, y: p.ebitdaEUR.value, z: p.euVolume.value }));
   const xMid = 150, yMid = 100;
   const danger = points.filter((q) => q.x > xMid && q.y < yMid).map((q) => q.name);
   const list = (a: string[]) => (a.length <= 1 ? a.join("") : `${a.slice(0, -1).join(", ")} and ${a[a.length - 1]}`);
@@ -35,8 +35,11 @@ export default function Industry() {
   const gap = steel.map((p) => {
     const b = benchmarkFor(p), e = p.actualDirect.value;
     const f26 = cbamFactor(2026) * b, f30 = cbamFactor(2030) * b;
-    return { name: p.name, covered2026: +Math.min(e, f26).toFixed(2), gap2026: +Math.max(0, e - f26).toFixed(2), covered2030: +Math.min(e, f30).toFixed(2), gap2030: +Math.max(0, e - f30).toFixed(2) };
+    return { id: p.id, name: p.name, e, free2026: f26, free2030: f30, covered2026: +Math.min(e, f26).toFixed(2), gap2026: +Math.max(0, e - f26).toFixed(2), covered2030: +Math.min(e, f30).toFixed(2), gap2030: +Math.max(0, e - f30).toFixed(2) };
   });
+  const splits = gap.map((g) => allocSplit(g));
+  const avg = (k: "share2026" | "share2030") => splits.reduce((a, s) => a + s[k], 0) / splits.length;
+  const allOverHalf = splits.every((s) => s.share2030 > 0.5);
   const foot = PRODUCERS.filter((p) => p.sector !== "steel").map((p) => ({
     name: p.name, charged: p.sector === "cement" ? p.actualDirect.value + p.indirect.value : p.actualDirect.value, uncharged: p.sector === "cement" ? 0 : p.indirect.value,
   }));
@@ -68,10 +71,10 @@ export default function Industry() {
           <Mekko cols={mk} year={2030} />
         </Exhibit>
         <Exhibit n={3} title={`${list(danger)} ${danger.length === 1 ? "sits" : "sit"} in the danger quadrant: high 2030 cost per tonne and the thinnest margin to absorb it`}
-          subtitle="2030 verified CBAM cost per tonne (100% pass-through) against EBITDA per tonne; bubble size = EU volume"
+          subtitle="2030 verified CBAM cost per tonne (100% pass-through) against EBITDA per tonne; arrows show the move from 2026; bubble size = EU volume"
           source="Model at €82.32 growing 3%/yr, law-in-force phase-out. EBITDA: JSW and SAIL FY26 results (grade C); others estimated (grade D)."
           table={{ columns: ["Producer", "2030 €/t", "EBITDA €/t", "EU Mt"], rows: points.map((p) => [p.name, Math.round(p.x), p.y, p.z]) }}>
-          <ExposureMatrix points={points} xMid={xMid} yMid={yMid} />
+          <RiskMatrix points={points} xMid={xMid} yMid={yMid} />
         </Exhibit>
 
         <div className="grid gap-6 lg:grid-cols-2">
@@ -88,11 +91,11 @@ export default function Industry() {
           </Panel>
         </div>
 
-        <Exhibit n={5} title="By 2030 every producer pays on more than half of its emissions; the charged slice roughly doubles in four years"
+        <Exhibit n={5} title={`${allOverHalf ? "By 2030 every producer pays on more than half of its emissions" : "By 2030 most producers pay on a growing share of emissions"}: the charged share rises from ${Math.round(avg("share2026") * 100)}% to ${Math.round(avg("share2030") * 100)}% on average in four years`}
           subtitle="Verified direct tCO₂ per tonne split into the part covered by free allocation and the part charged"
           source="Implementing Reg. 2025/2620 benchmarks; CBAM factor 97.5% (2026), 51.5% (2030); intensities grade D."
           table={{ columns: ["Producer", "Covered 2026", "Charged 2026", "Covered 2030", "Charged 2030"], rows: gap.map((g) => [g.name, g.covered2026, g.gap2026, g.covered2030, g.gap2030]) }}>
-          <GapChart data={gap} />
+          <AllocationBars rows={gap} />
         </Exhibit>
 
         <Exhibit n={6} title="The cost per tonne steps up in 2030 for every producer, and keeps climbing to 2034"

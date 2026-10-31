@@ -19,6 +19,24 @@ export const metadata: Metadata = {
   openGraph: { type: "website", siteName: "CBAM India", url: "https://cbam-india.vercel.app", description: DESC },
   twitter: { card: "summary_large_image", description: DESC },
   authors: [{ name: "Shreshtha", url: "https://github.com/nightraven4545" }],
+  keywords: ["CBAM", "CBAM India", "carbon border adjustment mechanism", "Indian steel", "CBAM default values", "CBAM cost", "EU ETS", "CCTS", "Article 9", "green steel", "aluminium", "cement"],
+};
+
+// Structured data for search engines and AI assistants: the site and the report it publishes.
+const LD = {
+  "@context": "https://schema.org",
+  "@graph": [
+    { "@type": "WebSite", "@id": "https://cbam-india.vercel.app/#site", url: "https://cbam-india.vercel.app", name: "CBAM India", inLanguage: "en" },
+    {
+      "@type": "Report", "@id": "https://cbam-india.vercel.app/#report", url: "https://cbam-india.vercel.app",
+      name: "CBAM India: what Europe's carbon border costs Indian steel, aluminium and cement",
+      description: DESC, datePublished: "2026-10-31", inLanguage: "en", isPartOf: { "@id": "https://cbam-india.vercel.app/#site" },
+      author: { "@type": "Person", name: "Shreshtha", url: "https://github.com/nightraven4545" },
+      about: ["EU Carbon Border Adjustment Mechanism", "CBAM", "Indian steel industry", "carbon pricing", "Article 9 CBAM", "CCTS India", "green steel"],
+      keywords: "CBAM India, carbon border adjustment mechanism, Indian steel exports, CBAM default values India, CBAM cost calculator, EU ETS, CCTS, Article 9, green steel taxonomy, decarbonisation",
+      spatialCoverage: ["India", "European Union"], temporalCoverage: "2026/2034",
+    },
+  ],
 };
 
 const FOOT: [string, [string, string][]][] = [
@@ -32,6 +50,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="en" suppressHydrationWarning>
       <head>
         {/* Apply a saved light/dark choice before first paint (no flash). */}
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(LD) }} />
         <script dangerouslySetInnerHTML={{ __html: "try{var t=localStorage.getItem('theme');if(t==='dark'||t==='light')document.documentElement.dataset.theme=t}catch(e){}" }} />
       </head>
       <body className="antialiased min-h-screen">

@@ -89,8 +89,21 @@ Last updated: 31 Oct 2026.
     - navy footer with link columns.
   - Exhibits get a navy "Exhibit n" chip, an `#exhibit-n` anchor and a "Show table" chip.
 
+- v5.1:
+  - Industry exhibits:
+    - Exhibit 3 is now `RiskMatrix`: tinted quadrants with icons, logo bubbles, arrows from 2026 and greedy label placement.
+    - Exhibit 5 is now `AllocationBars`: covered / lost / charged per producer, with the charged share 2026 → 2030.
+  - Summary recommendations are cards: a navy hero card for priority 1, value bars, timing and owner chips.
+  - SEO, AEO and LLM optimisation:
+    - `src/lib/faq.ts`: computed Q&A, shown as a visible FAQ on / with FAQPage JSON-LD;
+    - site-wide WebSite and Report JSON-LD, plus metadata keywords;
+    - `sitemap.xml`, `robots.txt` and `/llms.txt`, all generated;
+    - `CITATION.cff`.
+  - README rewritten with 16 production-build screenshots in docs/screenshots; `readme.test.ts` guards its numbers. 49 tests.
+
 ## Next
 - A ₹/€ toggle, plus takeaways and contents panels on the model and industry pages.
+- README screenshots come from the local production build. vercel.app is blocked from the sandbox, so logos appear as monograms. Retake from the live site if a session has access.
 - ESG data gaps: SAIL and AM/NS intensity, SBTi status (check the SBTi target dashboard), renewable shares and BRSR Core assurance status.
 - Vercel import (manual, see above).
 - Q4 2026 price on 4 Jan 2027; weekly prices from 2027.

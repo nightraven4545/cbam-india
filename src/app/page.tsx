@@ -6,10 +6,49 @@ import CliffChart from "@/components/pages/CliffChart";
 import MiniWaterfall from "@/components/pages/MiniWaterfall";
 import { annualBill } from "@/lib/roadmap";
 import { facts } from "@/lib/storyline";
+import { faq } from "@/lib/faq";
 import { DirectIcon, VerifiedIcon, EuroIcon } from "@/components/visual/icons";
-import { Compass, FileText, SlidersHorizontal } from "lucide-react";
+import { ArrowRight, ChevronDown, Clock, Compass, Factory, FileText, Handshake, Landmark, Route, ShieldCheck, SlidersHorizontal, Telescope, type LucideIcon } from "lucide-react";
 import { Scorecard } from "@/components/consulting/exhibits";
 import { SCORECARD_RULES, scorecard } from "@/lib/exhibits";
+
+type Rec = { I: LucideIcon; num: number | null; title: string; body: string; value: string; when: string; owner: string; href: string };
+const OWNER_I: Record<string, LucideIcon> = { Producers: Factory, Government: Landmark };
+
+// One recommendation: priority badge, icon, the move, its value (with a bar when it is a modelled € figure), timing and owner.
+function RecCard({ r, i, max, hero }: { r: Rec; i: number; max: number; hero: boolean }) {
+  const O = OWNER_I[r.owner] ?? Factory;
+  return (
+    <li className={`relative flex flex-col rounded-xl p-5 sm:p-6 ${hero ? "on-dark md:col-span-2 bg-masthead text-on-dark" : "border border-line bg-surface"}`}>
+      <div className="flex items-start gap-4">
+        <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl ${hero ? "bg-white/10 text-on-dark-accent" : "bg-sunken text-s1i"}`}><r.I aria-hidden size={22} /></span>
+        <div className="min-w-0 flex-1">
+          <p className={`text-xs font-semibold uppercase tracking-wide ${hero ? "text-on-dark-accent" : "text-ink-3"}`}>Priority {i + 1}</p>
+          <h3 className={`font-cond font-semibold leading-snug mt-0.5 ${hero ? "text-2xl" : "text-xl"}`}>{r.title}</h3>
+          <p className={`mt-1.5 max-w-[70ch] ${hero ? "text-on-dark-2" : "text-ink-2"}`}>{r.body}</p>
+        </div>
+        <div className="hidden sm:block text-right shrink-0">
+          <p className={`text-xs ${hero ? "text-on-dark-2" : "text-ink-3"}`}>Value</p>
+          <p className={`font-cond font-semibold leading-none mt-1 ${hero ? "text-4xl text-on-dark" : "text-2xl text-s3i"}`}>{r.value}</p>
+        </div>
+      </div>
+      <div className="mt-auto pt-4">
+        {r.num !== null && (
+          <div className="mb-3 flex items-center gap-2 text-xs">
+            <span className={`h-1.5 flex-1 rounded-full overflow-hidden ${hero ? "bg-white/12" : "bg-sunken"}`} aria-hidden><span className={`block h-full rounded-full ${hero ? "bg-on-dark-accent" : "bg-s3"}`} style={{ width: `${(r.num / max) * 100}%` }} /></span>
+            <span className={hero ? "text-on-dark-2" : "text-ink-3"}>of the 2026–34 bill avoided</span>
+          </div>
+        )}
+        <div className="flex flex-wrap items-center gap-2 text-xs">
+          <span className={`sm:hidden font-cond text-lg font-semibold mr-1 ${hero ? "" : "text-s3i"}`}>{r.value}</span>
+          <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 ${hero ? "bg-white/10" : "bg-sunken text-ink-2"}`}><Clock aria-hidden size={13} />{r.when}</span>
+          <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 ${hero ? "bg-white/10" : "bg-sunken text-ink-2"}`}><O aria-hidden size={13} />{r.owner}</span>
+          <Link href={r.href} className={`ml-auto inline-flex items-center gap-1 font-medium ${hero ? "text-on-dark-accent" : "text-s1i"} hover:underline`}>See the evidence<ArrowRight aria-hidden size={14} /></Link>
+        </div>
+      </div>
+    </li>
+  );
+}
 
 export default function Summary() {
   const f = facts();
@@ -21,14 +60,17 @@ export default function Summary() {
   const sc = scorecard();
   const reds = sc.map((r) => ({ name: r.p.name, n: Object.values(r.cells).filter((c) => c.level === "red").length })).sort((a, b) => b.n - a.n);
   const allRedPenalty = sc.filter((r) => r.cells.penalty.level !== "green").length;
-  const recs = [
-    { title: "Verify every EU-bound tonne now", body: `Accredited, installation-level emissions data replaces India's punitive default. It is worth ${m(f.verification)} a year to EU buyers of the five largest exporters.`, value: bn(verifyStep), when: "Next 6 months", owner: "Producers", href: "/roadmap" },
-    { title: "Reprice the risk in EU contracts", body: "Index CBAM cost-sharing to the certificate price instead of conceding full pass-through. Back it with a verified-intensity warranty.", value: "Margin protection", when: "Next contract round", owner: "Producers", href: "/model" },
-    { title: "Serve Europe from the cleanest plants", body: `Route EU orders to the lowest-carbon sites and run the efficiency, scrap and biochar stack before the 2030 cliff. Worth ${m(f.optUplift)}/yr for JSW from routing alone in 2030.`, value: bn(-(f.vas.steps[2].value + f.vas.steps[3].value + f.vas.steps[4].value)), when: "2026–29", owner: "Producers", href: "/industry" },
-    { title: "Keep hydrogen as a staged option", body: f.h2first ? `Building H₂-DRI in 2026 destroys ${eur(-f.h2.npvNow)}/t of value. Stay H₂-ready; exercise from ${f.h2first.year} if the certificate price passes ${eur(f.h2first.price!)}/t, or earlier with a buyer premium.` : "Stay H₂-ready; do not commit capital yet.", value: `${eur(f.h2.optionValue)}/t option`, when: "2030+", owner: "Producers", href: "/model" },
-    { title: "Make India's carbon price count in Brussels", body: `An explicit, Article 9-creditable price on exported carbon keeps ${bn(f.polExplicit)} in India over 2026–34; CCTS in its current intensity design keeps ${m(f.polCcts)}.`, value: bn(f.polExplicit), when: "2026–29", owner: "Government", href: "/policy" },
+  const recs: Rec[] = [
+    { I: ShieldCheck, num: verifyStep, title: "Verify every EU-bound tonne now", body: `Accredited, installation-level emissions data replaces India's punitive default. It is worth ${m(f.verification)} a year to EU buyers of the five largest exporters.`, value: bn(verifyStep), when: "Next 6 months", owner: "Producers", href: "/roadmap" },
+    { I: Handshake, num: null, title: "Reprice the risk in EU contracts", body: "Index CBAM cost-sharing to the certificate price instead of conceding full pass-through. Back it with a verified-intensity warranty.", value: "Margin protection", when: "Next contract round", owner: "Producers", href: "/model" },
+    { I: Route, num: -(f.vas.steps[2].value + f.vas.steps[3].value + f.vas.steps[4].value), title: "Serve Europe from the cleanest plants", body: `Route EU orders to the lowest-carbon sites and run the efficiency, scrap and biochar stack before the 2030 cliff. Worth ${m(f.optUplift)}/yr for JSW from routing alone in 2030.`, value: bn(-(f.vas.steps[2].value + f.vas.steps[3].value + f.vas.steps[4].value)), when: "2026–29", owner: "Producers", href: "/industry" },
+    { I: Telescope, num: null, title: "Keep hydrogen as a staged option", body: f.h2first ? `Building H₂-DRI in 2026 destroys ${eur(-f.h2.npvNow)}/t of value. Stay H₂-ready; exercise from ${f.h2first.year} if the certificate price passes ${eur(f.h2first.price!)}/t, or earlier with a buyer premium.` : "Stay H₂-ready; do not commit capital yet.", value: `${eur(f.h2.optionValue)}/t option`, when: "2030+", owner: "Producers", href: "/model" },
+    { I: Landmark, num: f.polExplicit, title: "Make India's carbon price count in Brussels", body: `An explicit, Article 9-creditable price on exported carbon keeps ${bn(f.polExplicit)} in India over 2026–34; CCTS in its current intensity design keeps ${m(f.polCcts)}.`, value: bn(f.polExplicit), when: "2026–29", owner: "Government", href: "/policy" },
   ];
 
+  const maxRec = Math.max(...recs.map((r) => r.num ?? 0));
+  const qa = faq();
+  const faqLd = { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: qa.map((x) => ({ "@type": "Question", name: x.q, acceptedAnswer: { "@type": "Answer", text: x.a } })) };
   return (
     <div>
       <PageHeader step="situation"
@@ -83,23 +125,15 @@ export default function Summary() {
       </div>
 
       <section className="mt-14" aria-labelledby="recs">
-        <h2 id="recs" className="font-cond text-[1.7rem] font-semibold leading-tight max-w-[40ch]">What we recommend, in order of priority</h2>
-        <ol className="mt-6 grid gap-px overflow-hidden rounded-[10px] border border-line bg-line">
-          {recs.map((r, i) => (
-            <li key={r.title} className="bg-surface p-5 grid gap-4 sm:grid-cols-[48px_1fr_220px] items-start">
-              <span className="font-cond text-3xl font-semibold text-ink-3 leading-none">{i + 1}</span>
-              <div>
-                <h3 className="font-semibold text-lg leading-snug">{r.title}</h3>
-                <p className="text-ink-2 mt-1 max-w-[70ch]">{r.body}</p>
-                <Link href={r.href} className="text-sm text-s1i underline underline-offset-2 mt-2 inline-block">See the evidence</Link>
-              </div>
-              <dl className="grid grid-cols-3 sm:grid-cols-1 gap-2 text-sm">
-                <div><dt className="text-ink-3 text-xs">Value</dt><dd className="font-medium">{r.value}</dd></div>
-                <div><dt className="text-ink-3 text-xs">When</dt><dd>{r.when}</dd></div>
-                <div><dt className="text-ink-3 text-xs">Owner</dt><dd>{r.owner}</dd></div>
-              </dl>
-            </li>
-          ))}
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-s1i">The answer</p>
+            <h2 id="recs" className="font-cond text-[1.7rem] font-semibold leading-tight max-w-[40ch] mt-1">What we recommend, in order of priority</h2>
+          </div>
+          <p className="text-sm text-ink-2 max-w-[44ch]">{`Together, the modelled moves take the 2026–34 bill from ${bn(f.vas.doNothing)} to ${bn(f.vas.residual)}.`}</p>
+        </div>
+        <ol className="mt-6 grid gap-4 md:grid-cols-2">
+          {recs.map((r, i) => <RecCard key={r.title} r={r} i={i} max={maxRec} hero={i === 0} />)}
         </ol>
       </section>
 
@@ -114,6 +148,19 @@ export default function Summary() {
           <a href="/CBAM-India-one-pager.pdf" className="btn btn-secondary"><FileText aria-hidden size={15} />One-page PDF</a>
         </div>
       </Panel>
+      <section className="mt-14" aria-labelledby="faq">
+        <p className="text-xs font-semibold uppercase tracking-wide text-s1i">Quick answers</p>
+        <h2 id="faq" className="font-cond text-[1.7rem] font-semibold leading-tight mt-1">Questions people ask about CBAM and India</h2>
+        <div className="mt-5 grid gap-2 md:grid-cols-2">
+          {qa.map((x) => (
+            <details key={x.q} className="group rounded-xl border border-line bg-surface px-4 open:pb-4">
+              <summary className="cursor-pointer list-none py-3 font-medium flex items-start justify-between gap-3">{x.q}<ChevronDown aria-hidden size={16} className="mt-1 shrink-0 text-ink-3 transition-transform group-open:rotate-180" /></summary>
+              <p className="text-ink-2 text-[15px]">{x.a}</p>
+            </details>
+          ))}
+        </div>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
+      </section>
     </div>
   );
 }
