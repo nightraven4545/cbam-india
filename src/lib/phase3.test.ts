@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { PRODUCERS, LEVERS } from "./data";
 import { DEFAULT_SCENARIO as S, leverEconomics, optimiseAllocation, producerCost } from "./model";
-import { article9, downstreamCostPerUnit, paidPerTonne } from "./policy";
+import { article9, clusterExposure, downstreamCostPerUnit, downstreamRows, paidPerTonne, policyOptions } from "./policy";
 import { DEFAULT_H2, h2Option, projectValue } from "./options";
 
 const tata = PRODUCERS.find((p) => p.id === "tata")!;
@@ -78,5 +78,24 @@ describe("cement", () => {
     const re = LEVERS.find((l) => l.id === "cre")!;
     expect(leverEconomics(ultra, re, S, { dedicatedEU: true, cctsPrice: 0, greenPremium: 0, discount: 0.1 }).cbamRelevant).toBe(true);
     expect(producerCost(tata, S, "actual").applied).toBeCloseTo(tata.actualDirect.value, 9);
+  });
+});
+
+describe("policy page helpers", () => {
+  it("cluster exposure conserves the total defaults cost", () => {
+    const rows = downstreamRows(2028, true);
+    const total = rows.reduce((a, r) => a + r.df, 0);
+    const cl = clusterExposure(rows);
+    expect(cl.reduce((a, c) => a + c.inScope + c.proposed, 0)).toBeCloseTo(total, 3);
+    cl.slice(1).forEach((c, i) => expect(c.inScope + c.proposed).toBeLessThanOrEqual(cl[i].inScope + cl[i].proposed));
+  });
+  it("proposed headings cost nothing unless the extension is adopted", () => {
+    expect(downstreamRows(2030, false).filter((r) => r.status === "proposed").every((r) => r.df === 0)).toBe(true);
+  });
+  it("policy options: same total bill, explicit keeps the most, no price keeps nothing", () => {
+    const [none, ccts, expl] = policyOptions();
+    expect(none.kept).toBe(0);
+    expect(expl.kept).toBeGreaterThan(ccts.kept);
+    for (const o of [ccts, expl]) expect(o.kept + o.toEU).toBeCloseTo(none.toEU, 0);
   });
 });

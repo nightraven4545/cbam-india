@@ -52,8 +52,28 @@ Last updated: 31 Oct 2026.
       - India carbon stack.
     - The old primer stays collapsed below. All titles are computed. 44 tests.
 
+- v4.1, Roadmap and Policy redesign (feedback: "still bland"):
+  - Shared pieces:
+    - `KpiStrip`: hero numbers with icons;
+    - `IconTick`: icon axis labels, used on the value-at-stake waterfall site-wide;
+    - Sankey left margin now sized to the longest label.
+  - Roadmap:
+    - KPI strip;
+    - owner icons in the matrix list;
+    - a new 2026–34 Gantt with a regulation track (`src/lib/timeline.ts`, shared with /esg);
+    - swimlane cards with basis badges and milestones;
+    - KPI cards stepping baseline → 2027 → 2030.
+  - Policy:
+    - KPI strip;
+    - numbered exhibits whose titles update live with the controls;
+    - a three-design Article 9 options comparison (`policyOptions`);
+    - status icons and inline bars in the radar;
+    - an engineering-hub exposure ranking (`clusterExposure`);
+    - an icon formula strip in the MSME calculator.
+  - Helpers moved to `src/lib/policy.ts` and tested. 47 tests.
+
 ## Next
-- A ₹/€ toggle, plus takeaways and contents panels on the other long pages (model, industry, policy).
+- A ₹/€ toggle, plus takeaways and contents panels on the model and industry pages.
 - ESG data gaps: SAIL and AM/NS intensity, SBTi status (check the SBTi target dashboard), renewable shares and BRSR Core assurance status.
 - Vercel import (manual, see above).
 - Q4 2026 price on 4 Jan 2027; weekly prices from 2027.
@@ -80,5 +100,6 @@ Last updated: 31 Oct 2026.
 - Absolutely positioned children (sr-only) inside scroll boxes need a `relative` wrapper or they widen the page on mobile.
 - Logo img errors can fire before hydration; Logo checks `naturalWidth` after mount.
 - ESG figures: corporate Scope 1+2 per tonne of crude steel (BRSR/factsheet) is not the CBAM boundary (direct, per product). The two are kept apart, and the taxonomy rating uses the corporate figure only as a proxy.
+- Never nest block lists inside `<p>` (e.g. OwnerLegend renders a `<ul>`). React hydration fails and axe flags it. KpiStrip uses `<ul>/<li>`, not `<dl>`.
 - Do not `pkill -f` with a pattern that also matches your own shell command.
 - Commits: author `Shreshtha <77679539+nightraven4545@users.noreply.github.com>`, no AI co-author trailers.

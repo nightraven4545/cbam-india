@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import type { LucideIcon } from "lucide-react";
 import {
   Bar, BarChart, CartesianGrid, Cell, LabelList, ReferenceArea, ReferenceLine, ResponsiveContainer, Sankey, Scatter, ScatterChart,
   Tooltip, Treemap, XAxis, YAxis, ZAxis, Layer, Rectangle,
@@ -17,7 +18,7 @@ const fmtM = (n: number) => `${n < 0 ? "−" : ""}€${Math.abs(Math.round(n)).t
 
 // Waterfall: first and last steps are totals, the rest are signed deltas. Direct labels on every bar.
 export interface WStep { label: string; value: number; total?: boolean }
-export function Waterfall({ steps, height = 320, fmt = fmtM }: { steps: WStep[]; height?: number; fmt?: (n: number) => string }) {
+export function Waterfall({ steps, height = 320, fmt = fmtM, icons }: { steps: WStep[]; height?: number; fmt?: (n: number) => string; icons?: Record<string, LucideIcon> }) {
   let run = 0;
   const data = steps.map((s) => {
     if (s.total) { run = s.value; return { ...s, range: [Math.min(0, s.value), Math.max(0, s.value)], kind: "total" }; }
@@ -31,7 +32,7 @@ export function Waterfall({ steps, height = 320, fmt = fmtM }: { steps: WStep[];
       <ResponsiveContainer>
         <BarChart data={data} margin={{ top: 24, left: 4, right: 8, bottom: 4 }}>
           <CartesianGrid vertical={false} stroke="var(--line)" />
-          <XAxis dataKey="label" tick={{ ...AXIS, fontSize: 11 }} interval={0} height={56} tickLine={false} />
+          <XAxis dataKey="label" tick={icons ? <IconTick icons={icons} /> : { ...AXIS, fontSize: 11 }} interval={0} height={icons ? 72 : 56} tickLine={false} />
           <YAxis tick={AXIS} tickFormatter={(v) => fmt(v)} tickLine={false} axisLine={false} width={72} />
           <ReferenceLine y={0} stroke="var(--ink-3)" />
           <Tooltip {...TIP} formatter={(_v, _n, p) => fmt((p.payload as WStep).value)} />
@@ -112,11 +113,15 @@ export function SankeyChart({ nodes, links, height = 380, fmt = (v: number) => v
       </Layer>
     );
   };
+  // Source nodes are labelled on the left: size the margin to the longest "name value" so it is never clipped.
+  const targets = new Set(links.map((l) => l.target));
+  const srcLen = Math.max(0, ...nodes.map((n, i) => (targets.has(i) ? 0 : `${n.name} ${fmt(links.filter((l) => l.source === i).reduce((a, l) => a + l.value, 0))}`.length)));
+  const left = Math.max(40, Math.round(srcLen * 6.6) + 16);
   return (
     <div tabIndex={0} className="overflow-x-auto">
     <div style={{ height }} className="min-w-[680px]">
       <ResponsiveContainer>
-        <Sankey data={{ nodes, links }} nodePadding={18} nodeWidth={12} margin={{ left: 150, right: 190, top: 8, bottom: 8 }}
+        <Sankey data={{ nodes, links }} nodePadding={18} nodeWidth={12} margin={{ left, right: 190, top: 8, bottom: 8 }}
           link={{ stroke: "var(--s1)", strokeOpacity: 0.22 }} node={NodeShape as never} iterations={64}>
           <Tooltip {...TIP} formatter={(v: number) => fmt(v)} />
         </Sankey>
@@ -252,6 +257,22 @@ export function FlagTick(props: { x?: number; y?: number; payload?: { value: str
     <g transform={`translate(${x},${y})`}>
       <text x={code ? -24 : -4} y={0} dy={4} textAnchor="end" fontSize={11} fill="var(--ink-3)">{label}</text>
       {code && <foreignObject x={-20} y={-7} width={18} height={14}><Flag code={code} size={12} /></foreignObject>}
+    </g>
+  );
+}
+
+// Category-axis tick with an icon above a label wrapped to two lines.
+export function IconTick(props: { x?: number; y?: number; payload?: { value: string }; icons: Record<string, LucideIcon> }) {
+  const { x = 0, y = 0, payload, icons } = props;
+  const label = payload?.value ?? "";
+  const I: LucideIcon | undefined = icons[label];
+  const words = label.split(" ");
+  const lines: string[] = [""];
+  for (const w of words) { const cur = lines[lines.length - 1]; if ((cur + " " + w).trim().length > 16 && cur) lines.push(w); else lines[lines.length - 1] = (cur + " " + w).trim(); }
+  return (
+    <g transform={`translate(${x},${y})`}>
+      {I && <foreignObject x={-9} y={4} width={18} height={18}><I aria-hidden size={16} color="var(--ink-2)" /></foreignObject>}
+      {lines.slice(0, 3).map((l, i) => <text key={i} x={0} y={I !== undefined ? 34 + i * 13 : 12 + i * 13} textAnchor="middle" fontSize={11} fill="var(--ink-3)">{l}</text>)}
     </g>
   );
 }
