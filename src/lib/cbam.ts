@@ -39,6 +39,7 @@ export interface CostInput {
   price: number; // €/tCO2e certificate price
   originCarbonPrice?: number; // €/tCO2e effectively paid in India (Art. 9 deduction)
   regime?: Regime;
+  indirect?: number; // tCO2e/t added on top (stress test: indirect emissions brought into scope)
 }
 
 export interface CostResult {
@@ -51,7 +52,7 @@ export interface CostResult {
 }
 
 export function cbamCostPerTonne(i: CostInput): CostResult {
-  const applied = i.mode === "default" ? i.defaultValue * (1 + defaultMarkup(i.year)) : i.actual;
+  const applied = (i.mode === "default" ? i.defaultValue * (1 + defaultMarkup(i.year)) : i.actual) + (i.indirect ?? 0);
   const freeAllocation = cbamFactor(i.year, i.regime) * i.benchmark; // CSCF = 1 for 2026
   const certificates = Math.max(0, applied - freeAllocation);
   const gross = certificates * i.price;

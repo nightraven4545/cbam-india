@@ -1,61 +1,97 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Bar, BarChart, CartesianGrid, Cell, Legend, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from "recharts";
-import { PRODUCERS, LEVERS, PEER_DEFAULTS, STEEL_HR, benchmarkFor, type Confidence } from "@/lib/data";
+import { PRODUCERS, LEVERS, PEER_DEFAULTS, PRODUCTS, benchmarkFor, type Producer, type Sector } from "@/lib/data";
+import { AXIS, Card, Grade, Slider, TIP, eur, inr, m, pct } from "./ui";
+import { CrossoverCard, RiskCard, TornadoCard } from "./Phase2Cards";
 import { DEFAULT_SCENARIO, cumulativeExposure, leverEconomics, producerSummary, trajectory, type Scenario } from "@/lib/model";
 import { YEARS, cbamFactor, defaultMarkup } from "@/lib/cbam";
 
-const eur = (n: number, d = 0) => `€${n.toLocaleString("en-IN", { maximumFractionDigits: d, minimumFractionDigits: d })}`;
-const inr = (n: number) => `₹${Math.round(n).toLocaleString("en-IN")}`;
-const m = (n: number) => `€${(n / 1e6).toLocaleString("en-IN", { maximumFractionDigits: 0 })}m`;
-const pct = (n: number) => `${Math.round(n * 100)}%`;
-const AXIS = { stroke: "var(--ink-3)", fontSize: 12 };
-const TIP = { contentStyle: { background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 8, color: "var(--ink)" }, labelStyle: { color: "var(--ink)" } };
+const CUSTOM_ID = "custom";
+const URL_KEYS = ["year", "basePrice", "growth", "passThrough", "originCarbonPrice", "fx"] as const;
 
-function Grade({ c }: { c: Confidence }) {
-  return <span title={`Confidence ${c}`} className="ml-1 inline-block rounded border border-line px-1 text-[10px] text-ink-3 align-middle">{c}</span>;
+function customProducer(sector: Sector, c: { intensity: number; vol: number; ebitda: number }): Producer {
+  const g = (value: number) => ({ value, confidence: "D" as const, source: "User input" });
+  return {
+    id: CUSTOM_ID, name: "Custom producer", sector, route: "User-defined (primary route)", routeShares: [1, 0, 0],
+    production: g(Math.max(c.vol, 0.01) * 10), euVolume: g(c.vol), actualDirect: g(c.intensity), indirect: g(sector === "aluminium" ? 14 : 0.3),
+    ebitdaEUR: g(c.ebitda), note: "Your own inputs. Production is assumed at 10× EU volume for the lever maths.",
+  };
 }
 
-function Card({ title, sub, children }: { title: string; sub?: string; children: React.ReactNode }) {
-  return (
-    <section className="rounded-xl border border-line bg-surface p-4 sm:p-5">
-      <h2 className="font-semibold">{title}</h2>
-      {sub && <p className="text-sm text-ink-2 mt-1">{sub}</p>}
-      <div className="mt-4">{children}</div>
-    </section>
-  );
+function toCSV(rows: (string | number)[][]) {
+  return rows.map((r) => r.map((x) => (typeof x === "string" && /[",\n]/.test(x) ? `"${x.replace(/"/g, '""')}"` : x)).join(",")).join("\n");
 }
-
-function Slider(props: { label: string; value: number; min: number; max: number; step: number; fmt: (v: number) => string; onChange: (v: number) => void }) {
-  return (
-    <label className="block text-sm">
-      <span className="flex justify-between text-ink-2"><span>{props.label}</span><span className="text-ink font-medium">{props.fmt(props.value)}</span></span>
-      <input type="range" className="w-full accent-[var(--s1)]" min={props.min} max={props.max} step={props.step} value={props.value}
-        onChange={(e) => props.onChange(Number(e.target.value))} aria-label={props.label} />
-    </label>
-  );
+function download(name: string, text: string) {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([text], { type: "text/csv" }));
+  a.download = name;
+  a.click();
+  URL.revokeObjectURL(a.href);
 }
 
 export default function Dashboard() {
   const [s, setS] = useState<Scenario>(DEFAULT_SCENARIO);
+  const [sector, setSector] = useState<Sector>("steel");
   const [pid, setPid] = useState("jsw");
+  const [custom, setCustom] = useState({ intensity: 2.3, vol: 0.2, ebitda: 90 });
   const [dedicatedEU, setDedicatedEU] = useState(false);
   const [cctsPrice, setCcts] = useState(0);
   const [greenPremium, setPremium] = useState(0);
+  const [copied, setCopied] = useState(false);
   const set = <K extends keyof Scenario>(k: K) => (v: Scenario[K]) => setS((o) => ({ ...o, [k]: v }));
 
-  const p = PRODUCERS.find((x) => x.id === pid)!;
-  const rows = useMemo(() => PRODUCERS.map((x) => ({ p: x, r: producerSummary(x, s), cumD: cumulativeExposure(x, s, "default"), cumA: cumulativeExposure(x, s, "actual") })), [s]);
-  const r = rows.find((x) => x.p.id === pid)!.r;
+  // Shareable scenario: read the query string once, then mirror state into it.
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search);
+    const num = (k: string) => (q.has(k) && Number.isFinite(Number(q.get(k))) ? Number(q.get(k)) : undefined);
+    setS((o) => {
+      const n = { ...o };
+      for (const k of URL_KEYS) n[k] = num(k) ?? o[k];
+      if (q.get("regime") === "proposal") n.regime = "proposal";
+      if (q.get("indirect") === "1") n.includeIndirect = true;
+      return n;
+    });
+    const sec = q.get("sector");
+    if (sec === "steel" || sec === "aluminium") setSector(sec);
+    if (q.get("p")) setPid(q.get("p")!);
+    if (q.has("ci")) setCustom({ intensity: num("ci") ?? 2.3, vol: num("cv") ?? 0.2, ebitda: num("ce") ?? 90 });
+  }, []);
+  useEffect(() => {
+    const q = new URLSearchParams();
+    for (const k of URL_KEYS) if (s[k] !== DEFAULT_SCENARIO[k]) q.set(k, String(s[k]));
+    if (s.regime !== "law") q.set("regime", s.regime);
+    if (s.includeIndirect) q.set("indirect", "1");
+    if (sector !== "steel") q.set("sector", sector);
+    q.set("p", pid);
+    if (pid === CUSTOM_ID) { q.set("ci", String(custom.intensity)); q.set("cv", String(custom.vol)); q.set("ce", String(custom.ebitda)); }
+    window.history.replaceState(null, "", `?${q.toString()}`);
+  }, [s, sector, pid, custom]);
+
+  const list = useMemo(() => [...PRODUCERS.filter((x) => x.sector === sector), customProducer(sector, custom)], [sector, custom]);
+  const p = list.find((x) => x.id === pid) ?? list[0];
+  const product = PRODUCTS[sector];
+  const rows = useMemo(() => list.map((x) => ({ p: x, r: producerSummary(x, s), cumD: cumulativeExposure(x, s, "default"), cumA: cumulativeExposure(x, s, "actual") })), [list, s]);
+  const r = rows.find((x) => x.p.id === p.id)!.r;
   const traj = useMemo(() => trajectory(p, s), [p, s]);
   const levers = useMemo(
-    () => LEVERS.map((l) => ({ l, e: leverEconomics(p, l, s, { dedicatedEU, cctsPrice, greenPremium, discount: 0.1 }) }))
+    () => LEVERS.filter((l) => l.sector === sector).map((l) => ({ l, e: leverEconomics(p, l, s, { dedicatedEU, cctsPrice, greenPremium, discount: 0.1 }) }))
       .sort((a, b) => (b.e.irr ?? -9) - (a.e.irr ?? -9) || b.e.npv - a.e.npv),
-    [p, s, dedicatedEU, cctsPrice, greenPremium],
+    [p, s, sector, dedicatedEU, cctsPrice, greenPremium],
   );
+  const switchSector = (sec: Sector) => { setSector(sec); setPid(PRODUCERS.find((x) => x.sector === sec)!.id); };
+  const exportLeaderboard = () => download(`cbam-${sector}-${s.year}.csv`, toCSV([
+    ["Producer", "Direct tCO2/t", "CBAM EUR/t default", "CBAM EUR/t verified", "Exporter hit EUR/t (verified)", "EU EBITDA kept (verified)", "Verification value EUR/yr", "Cum 2026-34 verified EUR", "Cum 2026-34 default EUR"],
+    ...rows.map(({ p: x, r: y, cumA, cumD }) => [x.name, x.actualDirect.value, y.def.net.toFixed(2), y.act.net.toFixed(2), y.hitActual.toFixed(2), y.marginLeftActual.toFixed(3), Math.round(y.verificationValue), Math.round(cumA), Math.round(cumD)]),
+  ]));
+  const exportLevers = () => download(`cbam-levers-${p.id}.csv`, toCSV([
+    ["Lever", "Direct cut t/t", "Capex EUR/t", "NPV EUR/t", "IRR", "Payback yrs", "MAC EUR/tCO2", "CBAM relevant", "TRL"],
+    ...levers.map(({ l, e }) => [l.name, l.abatement, l.capex, e.npv.toFixed(1), e.irr === null ? "" : e.irr.toFixed(4), e.payback === null ? "" : e.payback.toFixed(2), e.mac === null ? "" : e.mac.toFixed(1), e.cbamRelevant ? "yes" : "no", l.trl]),
+  ]));
+  const copyLink = async () => { try { await navigator.clipboard.writeText(window.location.href); setCopied(true); setTimeout(() => setCopied(false), 1500); } catch { /* clipboard blocked: URL bar still has the link */ } };
 
   // EBITDA bridge per tonne of EU sales (floating bars as [low, high]).
   const base = p.ebitdaEUR.value;
@@ -71,29 +107,44 @@ export default function Dashboard() {
   ];
   const fill = (k: string) => (k === "cost" ? "var(--s2)" : k === "gain" ? "var(--s1)" : "var(--neutral)");
 
-  const peer = PEER_DEFAULTS.map((d) => ({ ...d, marked: d.value * (1 + defaultMarkup(s.year)) }));
+  const peer = PEER_DEFAULTS[sector].map((d) => ({ ...d, marked: d.value * (1 + defaultMarkup(s.year)) }));
   const macData = levers.filter((x) => x.e.mac !== null).map((x) => ({ name: x.l.name.split(" (")[0], mac: Math.round(x.e.mac!) })).sort((a, b) => a.mac - b.mac);
   const price = s.basePrice * Math.pow(1 + s.growth, s.year - 2026);
 
   return (
     <div className="space-y-6">
       <header className="space-y-3">
-        <p className="text-xs uppercase tracking-wider text-ink-3">EU CBAM · definitive regime since 1 Jan 2026 · steel MVP</p>
-        <h1 className="text-2xl sm:text-4xl font-semibold leading-tight max-w-3xl">Which Indian steelmakers lose as Europe prices carbon, and what should they do about it?</h1>
+        <p className="text-xs uppercase tracking-wider text-ink-3">EU CBAM · definitive regime since 1 Jan 2026 · steel + aluminium</p>
+        <h1 className="text-2xl sm:text-4xl font-semibold leading-tight max-w-3xl">Which Indian producers lose as Europe prices carbon, and what should they do about it?</h1>
         <p className="text-ink-2 max-w-3xl">
           The EU importer pays CBAM, but the Indian exporter bears it through lower prices. The cheapest lever is not a furnace: it is <strong className="text-ink">verified emissions data</strong>.
-          Unverified steel is charged on India&apos;s default of {STEEL_HR.defaultValue.value} tCO₂/t plus a mark-up. Verified BF-BOF steel runs at about 2.0–2.6.
+          {sector === "steel"
+            ? <> Unverified steel is charged on India&apos;s default of {product.defaultValue.value} tCO₂/t plus a mark-up. Verified BF-BOF steel runs at about 2.0–2.6.</>
+            : <> For aluminium, only anode and PFC emissions (about 1.7–1.8 t) are charged today, not the 14–15 t from captive coal power. Use the indirect-emissions stress test to see what happens if that changes.</>}
         </p>
       </header>
 
       <div className="grid gap-6 lg:grid-cols-[300px_1fr]">
         <aside className="space-y-4 rounded-xl border border-line bg-surface p-4 h-fit lg:sticky lg:top-20">
+          <div className="grid grid-cols-2 gap-1 rounded-lg bg-bg p-1 text-sm" role="tablist" aria-label="Sector">
+            {(["steel", "aluminium"] as const).map((sec) => (
+              <button key={sec} role="tab" aria-selected={sector === sec} onClick={() => switchSector(sec)}
+                className={`rounded-md py-1.5 capitalize ${sector === sec ? "bg-surface shadow-sm font-medium" : "text-ink-2"}`}>{sec}</button>
+            ))}
+          </div>
           <label className="block text-sm">
             <span className="text-ink-2">Producer</span>
-            <select className="mt-1 w-full rounded-md border border-line bg-bg px-2 py-1.5" value={pid} onChange={(e) => setPid(e.target.value)}>
-              {PRODUCERS.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}
+            <select className="mt-1 w-full rounded-md border border-line bg-bg px-2 py-1.5" value={p.id} onChange={(e) => setPid(e.target.value)}>
+              {list.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}
             </select>
           </label>
+          {p.id === CUSTOM_ID && (
+            <div className="space-y-3 rounded-lg border border-line p-3">
+              <Slider label="Direct intensity (tCO₂/t)" value={custom.intensity} min={0.2} max={sector === "steel" ? 4 : 3} step={0.05} fmt={(v) => v.toFixed(2)} onChange={(v) => setCustom((c) => ({ ...c, intensity: v }))} />
+              <Slider label="EU volume (Mt/yr)" value={custom.vol} min={0.01} max={2} step={0.01} fmt={(v) => v.toFixed(2)} onChange={(v) => setCustom((c) => ({ ...c, vol: v }))} />
+              <Slider label="EBITDA on EU sales (€/t)" value={custom.ebitda} min={20} max={sector === "steel" ? 250 : 1500} step={5} fmt={(v) => eur(v)} onChange={(v) => setCustom((c) => ({ ...c, ebitda: v }))} />
+            </div>
+          )}
           <Slider label="Year" value={s.year} min={2026} max={2034} step={1} fmt={String} onChange={set("year")} />
           <Slider label="Certificate price 2026 (€/t)" value={s.basePrice} min={50} max={150} step={0.01} fmt={(v) => eur(v, 2)} onChange={set("basePrice")} />
           <Slider label="Price growth / yr" value={s.growth} min={-0.05} max={0.1} step={0.01} fmt={pct} onChange={set("growth")} />
@@ -106,6 +157,11 @@ export default function Dashboard() {
               <label key={g} className="mr-4"><input type="radio" name="regime" checked={s.regime === g} onChange={() => set("regime")(g)} /> {g === "law" ? "Law in force" : "COM(2026) 616 proposal"}</label>
             ))}
           </fieldset>
+          <label className="flex items-start gap-2 text-sm">
+            <input type="checkbox" className="mt-1" checked={s.includeIndirect} onChange={(e) => set("includeIndirect")(e.target.checked)} />
+            <span>Stress test: charge indirect (electricity) emissions too<span className="block text-xs text-ink-3">Not law for steel or aluminium today; it is under review.</span></span>
+          </label>
+          <button onClick={copyLink} className="w-full rounded-md border border-line py-1.5 text-sm hover:bg-bg">{copied ? "Link copied ✓" : "Copy link to this scenario"}</button>
           <p className="text-xs text-ink-3">{s.year}: CBAM factor {pct(cbamFactor(s.year, s.regime))} · default mark-up {pct(defaultMarkup(s.year))} · price {eur(price, 2)}</p>
         </aside>
 
@@ -124,7 +180,7 @@ export default function Dashboard() {
             ))}
           </div>
 
-          <Card title={`${p.name}: EBITDA bridge per tonne sold to the EU (${s.year})`} sub={`${p.route}. Benchmark ${benchmarkFor(p).toFixed(3)} t (route-weighted); verified direct intensity ${p.actualDirect.value} t.`}>
+          <Card title={`${p.name}: EBITDA bridge per tonne sold to the EU (${s.year})`} sub={`${p.route}. Benchmark ${benchmarkFor(p).toFixed(3)} t (route-weighted, CN ${product.cn}); verified direct intensity ${p.actualDirect.value} t${s.includeIndirect ? ` + ${p.indirect.value} t indirect (stress test)` : ""}.`}>
             <div className="h-72">
               <ResponsiveContainer>
                 <BarChart data={bridge} margin={{ left: 8, right: 8 }}>
@@ -143,6 +199,7 @@ export default function Dashboard() {
           </Card>
 
           <Card title="Producer leaderboard" sub={`Year ${s.year}, ${pct(s.passThrough)} pass-through. "Cum." covers 2026–2034 at this pass-through. Click a row to select it.`}>
+            <button onClick={exportLeaderboard} className="mb-3 rounded-md border border-line px-3 py-1 text-xs hover:bg-bg">Download CSV</button>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="text-left text-ink-3">
@@ -150,7 +207,7 @@ export default function Dashboard() {
                 </thead>
                 <tbody>
                   {rows.map(({ p: x, r: y, cumA, cumD }) => (
-                    <tr key={x.id} onClick={() => setPid(x.id)} className={`border-t border-line cursor-pointer hover:bg-bg ${x.id === pid ? "bg-bg font-medium" : ""}`}>
+                    <tr key={x.id} onClick={() => setPid(x.id)} className={`border-t border-line cursor-pointer hover:bg-bg ${x.id === p.id ? "bg-bg font-medium" : ""}`}>
                       <td className="py-2 pr-3 whitespace-nowrap">{x.name}</td>
                       <td className="pr-3">{x.actualDirect.value}<Grade c={x.actualDirect.confidence} /></td>
                       <td className="pr-3">{eur(y.def.net)}</td>
@@ -183,7 +240,7 @@ export default function Dashboard() {
                 </ResponsiveContainer>
               </div>
             </Card>
-            <Card title="Country default values, tCO₂/t" sub={`Commission defaults incl. the ${pct(defaultMarkup(s.year))} mark-up in ${s.year}. India's default is the steepest, which hands an advantage to verified competitors.`}>
+            <Card title="Country default values, tCO₂/t" sub={`Commission defaults incl. the ${pct(defaultMarkup(s.year))} mark-up in ${s.year}. ${sector === "steel" ? "India's default is the steepest, which hands an advantage to verified competitors." : "India sits mid-pack; China's coal-based default is higher, Korea's far lower."}`}>
               <div className="h-64">
                 <ResponsiveContainer>
                   <BarChart data={peer} layout="vertical" margin={{ left: 40, right: 16 }}>
@@ -198,7 +255,12 @@ export default function Dashboard() {
             </Card>
           </div>
 
+          <TornadoCard p={p} s={s} />
+          <RiskCard p={p} s={s} />
+          {sector === "steel" && <CrossoverCard s={s} />}
+
           <Card title="Decarbonisation lab: which levers pay back?" sub={`${p.name}, 10% discount rate, capex in 2026, benefits from 2027. CBAM saving = avoided certificates × pass-through × EU share of output.`}>
+            <button onClick={exportLevers} className="mb-3 rounded-md border border-line px-3 py-1 text-xs hover:bg-bg">Download CSV</button>
             <div className="flex flex-wrap gap-x-8 gap-y-3 text-sm mb-4">
               <label className="flex items-center gap-2"><input type="checkbox" checked={dedicatedEU} onChange={(e) => setDedicatedEU(e.target.checked)} /> Dedicated EU line (all low-carbon output sold to the EU)</label>
               <div className="w-56"><Slider label="CCTS credit price (€/t)" value={cctsPrice} min={0} max={40} step={1} fmt={(v) => eur(v)} onChange={setCcts} /></div>
