@@ -2,6 +2,28 @@
   "name": "cbam-india",
   "version": "0.1.0",
   "private": true,
+  "description": "Interactive EU CBAM (Carbon Border Adjustment Mechanism) cost model and consulting-style analysis for Indian steel, aluminium and cement exporters: exposure, the 2030 cliff, Article 9, ESG and a roadmap.",
+  "homepage": "https://cbam-india.vercel.app",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nightraven4545/cbam-india"
+  },
+  "author": "Shreshtha (https://github.com/nightraven4545)",
+  "keywords": [
+    "cbam",
+    "carbon-border-adjustment-mechanism",
+    "carbon-pricing",
+    "eu-ets",
+    "india",
+    "steel",
+    "aluminium",
+    "cement",
+    "esg",
+    "decarbonization",
+    "green-steel",
+    "climate-policy",
+    "nextjs"
+  ],
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -21,6 +43,7 @@
     "lucide-react": "^0.468.0",
     "motion": "^14.9.0",
     "next": "^15.5.28",
+    "qrcode": "^1.5.4",
     "react": "19.1",
     "react-dom": "19.1",
     "recharts": "^2.15.4"
@@ -29,6 +52,7 @@
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
+    "@types/qrcode": "^1.5.5",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",

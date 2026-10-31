@@ -18,6 +18,42 @@ An engagement-style analysis and interactive model of the **EU Carbon Border Adj
 
 > **The answer in one line:** Europe's carbon border will cost India's five largest steel exporters **€14.7bn** over 2026–2034 if they do nothing, and **66%** of that is a tax on missing data. Verified emissions, cleaner plant routing and a creditable Indian carbon price cut the bill to **€2.8bn**.
 
+## About
+
+**CBAM India** is an independent, consulting-style analysis of how the EU Carbon Border Adjustment Mechanism affects Indian industry. It is written for four audiences:
+- **steel, aluminium and cement exporters** deciding where to invest;
+- **EU buyers** pricing CBAM into contracts;
+- **Indian policymakers** weighing Article 9 and the Carbon Credit Trading Scheme;
+- **ESG and sustainability teams** who need the numbers behind the narrative.
+
+It pairs a tested model of the regulation with the exhibits a client would expect: a scorecard, a Marimekko, a risk matrix, an abatement cost curve, a value-at-stake waterfall, a roadmap and an ESG scorecard.
+
+| | |
+|---|---|
+| **Author** | [Shreshtha](https://github.com/nightraven4545) |
+| **Published** | 31 October 2026 (data as of Q3 2026 CBAM certificate prices) |
+| **Live site** | [cbam-india.vercel.app](https://cbam-india.vercel.app) |
+| **Coverage** | Steel (JSW, Tata Steel, AM/NS India, JSPL, SAIL), aluminium (Vedanta, Hindalco, NALCO), cement (UltraTech, Shree, Dalmia), downstream MSME goods |
+| **Regulation** | Regulation (EU) 2023/956; Implementing Regulations 2025/2620, 2025/2621 and 2026/1740; proposals COM(2025) 989 and COM(2026) 616 |
+| **Cite** | See [`CITATION.cff`](CITATION.cff), or use GitHub's "Cite this repository" button |
+
+<table>
+<tr>
+<td width="38%"><a href="https://cbam-india.vercel.app/CBAM-India-one-pager.pdf"><img src="docs/screenshots/one-pager.png" alt="A4 one-page executive summary of the CBAM India analysis"></a></td>
+<td><b>The one-page executive summary (A4 PDF)</b><br><br>
+The whole story on one page:
+<ul>
+<li>the cost and the 2030 cliff;</li>
+<li>the value at stake;</li>
+<li>a red, amber and green scorecard for the five exporters;</li>
+<li>four insights and five prioritised moves;</li>
+<li>what it means for government and MSMEs.</li>
+</ul>
+Print-ready, with a QR code back to the live model.<br><br>
+<a href="https://cbam-india.vercel.app/CBAM-India-one-pager.pdf"><b>Download the PDF →</b></a></td>
+</tr>
+</table>
+
 ## Why it matters now
 
 - **CBAM is live.** Since 1 January 2026, EU importers of Indian steel, aluminium and cement must buy CBAM certificates priced off the EU carbon market (€82.32/t in Q3 2026).

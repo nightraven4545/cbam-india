@@ -129,6 +129,17 @@ input[type="range"] { accent-color: var(--s1); }
   body { background: #fff; }
   .slide { break-after: page; border: none !important; min-height: 180mm; margin: 0 !important; max-width: none !important; }
 }
+/* One-page summary: a fixed A4 portrait sheet. Always light (paper), printed edge to edge on its own named page. */
+.paper {
+  --bg: #e7ecf2; --surface: #ffffff; --sunken: #eef2f6; --ink: #0e2238; --ink-2: #3f5163; --ink-3: #5c6b7a; --line: #d3dbe3;
+  --s1: #2a78d6; --s2: #e8590c; --s3: #1b8a5a; --neutral: #8a96a3; --s1i: #1d62b5; --s2i: #b4410a; --s3i: #146c46;
+  --masthead: #0b1f36; --masthead-2: #10294a; --on-dark: #eef3f8; --on-dark-2: #b3c2d3; --on-dark-accent: #6cb2ff;
+  color: var(--ink);
+}
+.onepager { page: onepager; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+@page onepager { size: A4 portrait; margin: 0; }
 @media print {
-  .onepager { border: none !important; max-width: none !important; padding: 0 !important; }
+  body:has(.onepager) { background: #fff; }
+  body:has(.onepager) main { padding: 0 !important; max-width: none !important; }
+  body:has(.onepager) .onepager { box-shadow: none !important; }
 }

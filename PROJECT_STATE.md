@@ -101,6 +101,15 @@ Last updated: 31 Oct 2026.
     - `CITATION.cff`.
   - README rewritten with 16 production-build screenshots in docs/screenshots; `readme.test.ts` guards its numbers. 49 tests.
 
+- v5.2:
+  - The one-pager is redesigned as a fixed A4-portrait sheet (`.paper` keeps light tokens; named `@page onepager`, margin 0). It has:
+    - a navy header and KPI tiles;
+    - SVG cliff and waterfall charts;
+    - a red/amber/green scorecard with logos;
+    - insights, five priority rows, a policy and MSME strip, and a footer QR code (`qrcode`).
+  - The PDF is regenerated with Playwright (`emulateMedia print`, `preferCSSPageSize`, `printBackground`). It must stay one page: check that the content ends above the footer.
+  - README has an About section; `package.json` has a description, keywords and homepage.
+
 ## Next
 - A ₹/€ toggle, plus takeaways and contents panels on the model and industry pages.
 - README screenshots come from the local production build. vercel.app is blocked from the sandbox, so logos appear as monograms. Retake from the live site if a session has access.
