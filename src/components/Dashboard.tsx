@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import * as Tabs from "@radix-ui/react-tabs";
 import {
   Bar, BarChart, CartesianGrid, Cell, Legend, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from "recharts";
 import { PRODUCERS, LEVERS, PEER_DEFAULTS, PRODUCTS, benchmarkFor, type Producer, type Sector } from "@/lib/data";
 import { AXIS, Card, Grade, Slider, TIP, eur, inr, m, pct } from "./ui";
+import { PageHeader } from "./consulting/core";
 import { CrossoverCard, RiskCard, TornadoCard } from "./Phase2Cards";
 import { H2OptionCard, OptimiserCard } from "./Phase3Cards";
 import { DEFAULT_SCENARIO, cumulativeExposure, leverEconomics, producerSummary, trajectory, type Scenario } from "@/lib/model";
@@ -113,22 +115,16 @@ export default function Dashboard() {
   const price = s.basePrice * Math.pow(1 + s.growth, s.year - 2026);
 
   return (
-    <div className="space-y-6">
-      <header className="space-y-3">
-        <p className="text-xs uppercase tracking-wider text-ink-3">EU CBAM · definitive regime since 1 Jan 2026 · steel · aluminium · cement</p>
-        <h1 className="text-2xl sm:text-4xl font-semibold leading-tight max-w-3xl">Which Indian producers lose as Europe prices carbon, and what should they do about it?</h1>
-        <p className="text-ink-2 max-w-3xl">
-          The EU importer pays CBAM, but the Indian exporter bears it through lower prices. The cheapest lever is not a furnace: it is <strong className="text-ink">verified emissions data</strong>.
-          {sector === "steel"
-            ? <> Unverified steel is charged on India&apos;s default of {product.defaultValue.value} tCO₂/t plus a mark-up. Verified BF-BOF steel runs at about 2.0–2.6.</>
-            : sector === "cement"
-            ? <> Cement is the contrast case: India barely exports it to the EU, but it is the one sector here where <strong className="text-ink">electricity emissions are charged</strong>, so renewables and waste-heat recovery cut CBAM directly. OPC on defaults pays about €80/t, against about €15/t verified.</>
-            : <> For aluminium, only anode and PFC emissions (about 1.7–1.8 t) are charged today, not the 14–15 t from captive coal power. Use the indirect-emissions stress test to see what happens if that changes.</>}
-        </p>
-      </header>
+    <div>
+      <PageHeader step="model" title="Scenario model: test any producer, price path or policy, and every exhibit updates"
+        lede={sector === "steel"
+          ? <>Unverified steel is charged on India&apos;s default of {product.defaultValue.value} tCO₂/t plus a mark-up; verified BF-BOF steel runs at about 2.0–2.6. Every number below is computed live from the regulation&apos;s formula.</>
+          : sector === "cement"
+          ? <>Cement is the contrast case: India barely exports it to the EU, but electricity emissions are charged by law, so renewables and waste-heat recovery cut CBAM directly.</>
+          : <>For aluminium, only anode and PFC emissions (about 1.7–1.8 t) are charged today, not the 14–15 t from captive coal power. Use the indirect-emissions stress test to see what changes if that rule moves.</>} />
 
       <div className="grid gap-6 lg:grid-cols-[300px_1fr]">
-        <aside className="space-y-4 rounded-xl border border-line bg-surface p-4 h-fit lg:sticky lg:top-20">
+        <aside className="space-y-4 rounded-[10px] border border-line bg-surface p-4 h-fit lg:sticky lg:top-20">
           <div className="grid grid-cols-3 gap-1 rounded-lg bg-bg p-1 text-sm" role="tablist" aria-label="Sector">
             {(["steel", "aluminium", "cement"] as const).map((sec) => (
               <button key={sec} role="tab" aria-selected={sector === sec} onClick={() => switchSector(sec)}
@@ -175,7 +171,7 @@ export default function Dashboard() {
               { k: "…and on EU default values", v: inr(r.hitDefault * s.fx) + "/t", sub: `${eur(r.hitDefault)}/t · ${r.marginLeftDefault < 0 ? "wipes out EU EBITDA" : pct(1 - r.marginLeftDefault) + " of EU EBITDA"}` },
               { k: "Value of verification / yr", v: m(r.verificationValue), sub: `Importer's saving on ${p.euVolume.value} Mt, before any pass-through` },
             ].map((t) => (
-              <div key={t.k} className="rounded-xl border border-line bg-surface p-4">
+              <div key={t.k} className="rounded-[10px] border border-line bg-surface p-4">
                 <p className="text-xs text-ink-3">{t.k}</p>
                 <p className="text-2xl font-semibold mt-1">{t.v}</p>
                 <p className="text-xs text-ink-2 mt-1">{t.sub}</p>
@@ -183,156 +179,170 @@ export default function Dashboard() {
             ))}
           </div>
 
-          <Card title={`${p.name}: EBITDA bridge per tonne sold to the EU (${s.year})`} sub={`${p.route}. Benchmark ${benchmarkFor(p).toFixed(3)} t (route-weighted, CN ${product.cn}); verified direct intensity ${p.actualDirect.value} t${s.includeIndirect ? ` + ${p.indirect.value} t indirect (stress test)` : ""}.`}>
-            <div className="h-72">
-              <ResponsiveContainer>
-                <BarChart data={bridge} margin={{ left: 8, right: 8 }}>
-                  <CartesianGrid vertical={false} stroke="var(--line)" />
-                  <XAxis dataKey="name" tick={AXIS} interval={0} height={50} tickLine={false} />
-                  <YAxis tick={AXIS} tickFormatter={(v) => `€${v}`} tickLine={false} axisLine={false} />
-                  <ReferenceLine y={0} stroke="var(--ink-3)" />
-                  <Tooltip {...TIP} formatter={(v: number[]) => eur(v[1] - v[0])} />
-                  <Bar dataKey="range" radius={4} isAnimationActive={false}>
-                    {bridge.map((b) => <Cell key={b.name} fill={fill(b.kind)} />)}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-            <p className="text-sm text-ink-2">{p.note} EBITDA {eur(base)}/t<Grade c={p.ebitdaEUR.confidence} />, EU volume {p.euVolume.value} Mt<Grade c={p.euVolume.confidence} />.</p>
-          </Card>
-
-          <Card title="Producer leaderboard" sub={`Year ${s.year}, ${pct(s.passThrough)} pass-through. "Cum." covers 2026–2034 at this pass-through. Click a row to select it.`}>
-            <button onClick={exportLeaderboard} className="mb-3 rounded-md border border-line px-3 py-1 text-xs hover:bg-bg">Download CSV</button>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="text-left text-ink-3">
-                  <tr>{["Producer", "Intensity t/t", "CBAM €/t default", "CBAM €/t verified", "EU EBITDA kept (verified)", "Verification €/yr", "Cum. verified", "Cum. default"].map((h) => <th key={h} className="py-2 pr-3 font-medium whitespace-nowrap">{h}</th>)}</tr>
-                </thead>
-                <tbody>
-                  {rows.map(({ p: x, r: y, cumA, cumD }) => (
-                    <tr key={x.id} onClick={() => setPid(x.id)} className={`border-t border-line cursor-pointer hover:bg-bg ${x.id === p.id ? "bg-bg font-medium" : ""}`}>
-                      <td className="py-2 pr-3 whitespace-nowrap">{x.name}</td>
-                      <td className="pr-3">{x.actualDirect.value}<Grade c={x.actualDirect.confidence} /></td>
-                      <td className="pr-3">{eur(y.def.net)}</td>
-                      <td className="pr-3">{eur(y.act.net)}</td>
-                      <td className="pr-3">{y.marginLeftActual < 0 ? "negative" : pct(y.marginLeftActual)}</td>
-                      <td className="pr-3">{m(y.verificationValue)}</td>
-                      <td className="pr-3">{m(cumA)}</td>
-                      <td className="pr-3">{m(cumD)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </Card>
-
-          <div className="grid gap-6 xl:grid-cols-2">
-            <Card title="CBAM cost path, € per tonne" sub="The legal cost per tonne before pass-through. The free allocation falls from 97.5% to 0% by 2034.">
-              <div className="h-64">
-                <ResponsiveContainer>
-                  <LineChart data={traj} margin={{ left: 0, right: 12 }}>
-                    <CartesianGrid vertical={false} stroke="var(--line)" />
-                    <XAxis dataKey="year" tick={AXIS} tickLine={false} />
-                    <YAxis tick={AXIS} tickFormatter={(v) => `€${v}`} tickLine={false} axisLine={false} />
-                    <Tooltip {...TIP} formatter={(v: number) => eur(v)} />
-                    <Legend wrapperStyle={{ fontSize: 12 }} />
-                    <ReferenceLine x={s.year} stroke="var(--ink-3)" strokeDasharray="3 3" />
-                    <Line dataKey="default" name="EU default + mark-up" stroke="var(--s2)" strokeWidth={2} dot={{ r: 4 }} isAnimationActive={false} />
-                    <Line dataKey="actual" name="Verified actual" stroke="var(--s1)" strokeWidth={2} dot={{ r: 4 }} isAnimationActive={false} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </Card>
-            <Card title="Country default values, tCO₂/t" sub={`Commission defaults incl. the ${pct(defaultMarkup(s.year))} mark-up in ${s.year}. ${sector === "steel" ? "India's default is the steepest, which hands an advantage to verified competitors." : "India sits mid-pack; China's coal-based default is higher, Korea's far lower."}`}>
-              <div className="h-64">
-                <ResponsiveContainer>
-                  <BarChart data={peer} layout="vertical" margin={{ left: 40, right: 16 }}>
-                    <CartesianGrid horizontal={false} stroke="var(--line)" />
-                    <XAxis type="number" tick={AXIS} tickLine={false} />
-                    <YAxis type="category" dataKey="country" tick={AXIS} width={120} tickLine={false} />
-                    <Tooltip {...TIP} formatter={(v: number) => v.toFixed(2)} />
-                    <Bar dataKey="marked" name="Default incl. mark-up" fill="var(--s2)" radius={4} isAnimationActive={false} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </Card>
-          </div>
-
-          <TornadoCard p={p} s={s} />
-          <RiskCard p={p} s={s} />
-          {sector === "steel" && <CrossoverCard s={s} />}
-          {sector === "steel" && <OptimiserCard key={p.id} p={p} s={s} />}
-
-          <Card title="Decarbonisation lab: which levers pay back?" sub={`${p.name}, 10% discount rate, capex in 2026, benefits from 2027. CBAM saving = avoided certificates × pass-through × EU share of output.`}>
-            <button onClick={exportLevers} className="mb-3 rounded-md border border-line px-3 py-1 text-xs hover:bg-bg">Download CSV</button>
-            <div className="flex flex-wrap gap-x-8 gap-y-3 text-sm mb-4">
-              <label className="flex items-center gap-2"><input type="checkbox" checked={dedicatedEU} onChange={(e) => setDedicatedEU(e.target.checked)} /> Dedicated EU line (all low-carbon output sold to the EU)</label>
-              <div className="w-56"><Slider label="CCTS credit price (€/t)" value={cctsPrice} min={0} max={40} step={1} fmt={(v) => eur(v)} onChange={setCcts} /></div>
-              <div className="w-56"><Slider label="Green premium (€ per tCO₂ avoided)" value={greenPremium} min={0} max={150} step={5} fmt={(v) => eur(v)} onChange={setPremium} /></div>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="text-left text-ink-3">
-                  <tr>{["Lever", "Direct cut t/t", "Capex €/t", "NPV €/t", "IRR", "Payback", "MAC €/tCO₂", "Steel CBAM?", "TRL"].map((h) => <th key={h} className="py-2 pr-3 font-medium whitespace-nowrap">{h}</th>)}</tr>
-                </thead>
-                <tbody>
-                  {levers.map(({ l, e }) => (
-                    <tr key={l.id} className="border-t border-line align-top">
-                      <td className="py-2 pr-3"><span className="font-medium">{l.name}</span><br /><span className="text-xs text-ink-3">{l.note}</span></td>
-                      <td className="pr-3">{l.abatement}</td>
-                      <td className="pr-3">{eur(l.capex)}</td>
-                      <td className={`pr-3 ${e.npv >= 0 ? "text-accent" : ""}`}>{eur(e.npv)}</td>
-                      <td className="pr-3">{e.irr === null ? (e.npv >= 0 ? "n/a (no capex)" : "never") : pct(e.irr)}</td>
-                      <td className="pr-3">{e.payback === null ? "–" : e.payback < 0.05 ? "immediate" : `${e.payback.toFixed(1)} y`}</td>
-                      <td className="pr-3">{e.mac === null ? "–" : eur(e.mac)}</td>
-                      <td className="pr-3">{e.cbamRelevant ? "yes" : "no"}</td>
-                      <td className="pr-3">{l.trl}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <div className="mt-6">
-              <p className="text-sm font-medium mb-2">Marginal abatement cost (ex-CBAM revenue) vs the {s.year} certificate price</p>
-              <div className="h-72">
-                <ResponsiveContainer>
-                  <BarChart data={macData} layout="vertical" margin={{ left: 8, right: 24 }}>
-                    <CartesianGrid horizontal={false} stroke="var(--line)" />
-                    <XAxis type="number" tick={AXIS} tickFormatter={(v) => `€${v}`} tickLine={false} />
-                    <YAxis type="category" dataKey="name" tick={{ ...AXIS, fontSize: 11 }} width={150} tickLine={false} />
-                    <Tooltip {...TIP} formatter={(v: number) => `${eur(v)}/tCO₂`} />
-                    <ReferenceLine x={price} stroke="var(--s2)" strokeDasharray="4 4" label={{ value: `certificate ${eur(price)}`, fill: "var(--ink-2)", fontSize: 11, position: "top" }} />
-                    <ReferenceLine x={0} stroke="var(--ink-3)" />
-                    <Bar dataKey="mac" name="€/tCO₂" fill="var(--s1)" radius={4} isAnimationActive={false} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-              <p className="text-xs text-ink-3 mt-2">Levers left of the dashed line cost less per tonne of CO₂ than buying certificates. Only levers that cut direct emissions avoid steel CBAM.</p>
-            </div>
-          </Card>
-
-          {sector === "steel" && <H2OptionCard s={s} />}
-
-          <Card title="Timeline: law today vs proposals">
-            <ol className="text-sm space-y-2">
-              {[
-                ["1 Oct 2023 – 31 Dec 2025", "Transitional period: reporting only, no payment.", "law"],
-                ["1 Jan 2026", "Definitive regime: authorised declarants, 50 t de minimis (Omnibus Reg. 2025/2083), defaults + 10% mark-up.", "law"],
-                ["7 Apr / 6 Jul / 5 Oct 2026", "Quarterly certificate prices: €75.36, €75.28, €82.32.", "law"],
-                ["1 Jul 2026", "EU steel safeguard replaced by tariff-rate quotas: India ≈ 2.8 Mt, 50% tariff above quota; CBAM applies within quota.", "law"],
-                ["17 Jul 2026", "COM(2026) 616 (ETS Phase 5) proposes reintroducing 15% of phased-out free allocation from 2028 and ending the phase-out in 2038.", "proposal"],
-                ["2027", "Certificate sales from 1 Feb; weekly pricing; 50% quarterly holding; 2026 declaration due 30 Sep 2027; mark-up 20%.", "law"],
-                ["2028", "Mark-up reaches 30%; extension to ~180 downstream steel and aluminium goods proposed.", "proposal"],
-                ["2030 → 2034", "Free allocation falls 77.5% → 51.5% → 0%: the cash cliff.", "law"],
-              ].map(([d, t, k]) => (
-                <li key={d} className="grid grid-cols-[150px_1fr] gap-3">
-                  <span className="text-ink-3">{d}</span>
-                  <span>{t} <span className={`ml-1 text-[10px] uppercase rounded px-1 border ${k === "law" ? "border-s1 text-s1" : "border-s2 text-s2"}`}>{k}</span></span>
-                </li>
+          <Tabs.Root defaultValue="exposure" className="min-w-0">
+            <Tabs.List aria-label="Model views" className="flex gap-1 overflow-x-auto border-b border-line mb-5">
+              {[["exposure","Exposure"],["risk","Risk"],["competitiveness","Competitiveness"],["levers","Levers"],["trade","Trade"],["timeline","Timeline"]].map(([v,l]) => (
+                <Tabs.Trigger key={v} value={v} className="px-3 py-2 text-sm whitespace-nowrap text-ink-3 border-b-2 border-transparent -mb-px data-[state=active]:text-ink data-[state=active]:border-ink data-[state=active]:font-medium hover:text-ink">{l}</Tabs.Trigger>
               ))}
-            </ol>
-          </Card>
-          <p className="text-xs text-ink-3">Years modelled: {YEARS[0]}–{YEARS[YEARS.length - 1]}. Grades: A verified · B regulation · C company disclosure · D estimate · E EU default. See Methodology.</p>
+            </Tabs.List>
+            <Tabs.Content value="exposure" className="space-y-6">
+              <Card title={`${p.name}: EBITDA bridge per tonne sold to the EU (${s.year})`} sub={`${p.route}. Benchmark ${benchmarkFor(p).toFixed(3)} t (route-weighted, CN ${product.cn}); verified direct intensity ${p.actualDirect.value} t${s.includeIndirect ? ` + ${p.indirect.value} t indirect (stress test)` : ""}.`}>
+                <div className="h-72">
+                  <ResponsiveContainer>
+                    <BarChart data={bridge} margin={{ left: 8, right: 8 }}>
+                      <CartesianGrid vertical={false} stroke="var(--line)" />
+                      <XAxis dataKey="name" tick={AXIS} interval={0} height={50} tickLine={false} />
+                      <YAxis tick={AXIS} tickFormatter={(v) => `€${v}`} tickLine={false} axisLine={false} />
+                      <ReferenceLine y={0} stroke="var(--ink-3)" />
+                      <Tooltip {...TIP} formatter={(v: number[]) => eur(v[1] - v[0])} />
+                      <Bar dataKey="range" radius={4} isAnimationActive={false}>
+                        {bridge.map((b) => <Cell key={b.name} fill={fill(b.kind)} />)}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+                <p className="text-sm text-ink-2">{p.note} EBITDA {eur(base)}/t<Grade c={p.ebitdaEUR.confidence} />, EU volume {p.euVolume.value} Mt<Grade c={p.euVolume.confidence} />.</p>
+              </Card>
+              <Card title="Producer leaderboard" sub={`Year ${s.year}, ${pct(s.passThrough)} pass-through. "Cum." covers 2026–2034 at this pass-through. Click a row to select it.`}>
+                <button onClick={exportLeaderboard} className="mb-3 rounded-md border border-line px-3 py-1 text-xs hover:bg-bg">Download CSV</button>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="text-left text-ink-3">
+                      <tr>{["Producer", "Intensity t/t", "CBAM €/t default", "CBAM €/t verified", "EU EBITDA kept (verified)", "Verification €/yr", "Cum. verified", "Cum. default"].map((h) => <th key={h} className="py-2 pr-3 font-medium whitespace-nowrap">{h}</th>)}</tr>
+                    </thead>
+                    <tbody>
+                      {rows.map(({ p: x, r: y, cumA, cumD }) => (
+                        <tr key={x.id} onClick={() => setPid(x.id)} className={`border-t border-line cursor-pointer hover:bg-bg ${x.id === p.id ? "bg-bg font-medium" : ""}`}>
+                          <td className="py-2 pr-3 whitespace-nowrap">{x.name}</td>
+                          <td className="pr-3">{x.actualDirect.value}<Grade c={x.actualDirect.confidence} /></td>
+                          <td className="pr-3">{eur(y.def.net)}</td>
+                          <td className="pr-3">{eur(y.act.net)}</td>
+                          <td className="pr-3">{y.marginLeftActual < 0 ? "negative" : pct(y.marginLeftActual)}</td>
+                          <td className="pr-3">{m(y.verificationValue)}</td>
+                          <td className="pr-3">{m(cumA)}</td>
+                          <td className="pr-3">{m(cumD)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </Card>
+              <div className="grid gap-6 xl:grid-cols-2">
+                <Card title="CBAM cost path, € per tonne" sub="The legal cost per tonne before pass-through. The free allocation falls from 97.5% to 0% by 2034.">
+                  <div className="h-64">
+                    <ResponsiveContainer>
+                      <LineChart data={traj} margin={{ left: 0, right: 12 }}>
+                        <CartesianGrid vertical={false} stroke="var(--line)" />
+                        <XAxis dataKey="year" tick={AXIS} tickLine={false} />
+                        <YAxis tick={AXIS} tickFormatter={(v) => `€${v}`} tickLine={false} axisLine={false} />
+                        <Tooltip {...TIP} formatter={(v: number) => eur(v)} />
+                        <Legend wrapperStyle={{ fontSize: 12 }} />
+                        <ReferenceLine x={s.year} stroke="var(--ink-3)" strokeDasharray="3 3" />
+                        <Line dataKey="default" name="EU default + mark-up" stroke="var(--s2)" strokeWidth={2} dot={{ r: 4 }} isAnimationActive={false} />
+                        <Line dataKey="actual" name="Verified actual" stroke="var(--s1)" strokeWidth={2} dot={{ r: 4 }} isAnimationActive={false} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </Card>
+                <Card title="Country default values, tCO₂/t" sub={`Commission defaults incl. the ${pct(defaultMarkup(s.year))} mark-up in ${s.year}. ${sector === "steel" ? "India's default is the steepest, which hands an advantage to verified competitors." : "India sits mid-pack; China's coal-based default is higher, Korea's far lower."}`}>
+                  <div className="h-64">
+                    <ResponsiveContainer>
+                      <BarChart data={peer} layout="vertical" margin={{ left: 40, right: 16 }}>
+                        <CartesianGrid horizontal={false} stroke="var(--line)" />
+                        <XAxis type="number" tick={AXIS} tickLine={false} />
+                        <YAxis type="category" dataKey="country" tick={AXIS} width={120} tickLine={false} />
+                        <Tooltip {...TIP} formatter={(v: number) => v.toFixed(2)} />
+                        <Bar dataKey="marked" name="Default incl. mark-up" fill="var(--s2)" radius={4} isAnimationActive={false} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </Card>
+              </div>
+            </Tabs.Content>
+            <Tabs.Content value="risk" className="space-y-6">
+              <TornadoCard p={p} s={s} />
+              <RiskCard p={p} s={s} />
+            </Tabs.Content>
+            <Tabs.Content value="competitiveness" className="space-y-6">
+              {sector === "steel" && <CrossoverCard s={s} />}
+              {sector !== "steel" && <p className="text-sm text-ink-2">The delivered-cost crossover is modelled for hot-rolled steel. Switch the sector to steel to see it.</p>}
+            </Tabs.Content>
+            <Tabs.Content value="levers" className="space-y-6">
+              <Card title="Decarbonisation lab: which levers pay back?" sub={`${p.name}, 10% discount rate, capex in 2026, benefits from 2027. CBAM saving = avoided certificates × pass-through × EU share of output.`}>
+                <button onClick={exportLevers} className="mb-3 rounded-md border border-line px-3 py-1 text-xs hover:bg-bg">Download CSV</button>
+                <div className="flex flex-wrap gap-x-8 gap-y-3 text-sm mb-4">
+                  <label className="flex items-center gap-2"><input type="checkbox" checked={dedicatedEU} onChange={(e) => setDedicatedEU(e.target.checked)} /> Dedicated EU line (all low-carbon output sold to the EU)</label>
+                  <div className="w-56"><Slider label="CCTS credit price (€/t)" value={cctsPrice} min={0} max={40} step={1} fmt={(v) => eur(v)} onChange={setCcts} /></div>
+                  <div className="w-56"><Slider label="Green premium (€ per tCO₂ avoided)" value={greenPremium} min={0} max={150} step={5} fmt={(v) => eur(v)} onChange={setPremium} /></div>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="text-left text-ink-3">
+                      <tr>{["Lever", "Direct cut t/t", "Capex €/t", "NPV €/t", "IRR", "Payback", "MAC €/tCO₂", "Steel CBAM?", "TRL"].map((h) => <th key={h} className="py-2 pr-3 font-medium whitespace-nowrap">{h}</th>)}</tr>
+                    </thead>
+                    <tbody>
+                      {levers.map(({ l, e }) => (
+                        <tr key={l.id} className="border-t border-line align-top">
+                          <td className="py-2 pr-3"><span className="font-medium">{l.name}</span><br /><span className="text-xs text-ink-3">{l.note}</span></td>
+                          <td className="pr-3">{l.abatement}</td>
+                          <td className="pr-3">{eur(l.capex)}</td>
+                          <td className={`pr-3 ${e.npv >= 0 ? "text-accent" : ""}`}>{eur(e.npv)}</td>
+                          <td className="pr-3">{e.irr === null ? (e.npv >= 0 ? "n/a (no capex)" : "never") : pct(e.irr)}</td>
+                          <td className="pr-3">{e.payback === null ? "–" : e.payback < 0.05 ? "immediate" : `${e.payback.toFixed(1)} y`}</td>
+                          <td className="pr-3">{e.mac === null ? "–" : eur(e.mac)}</td>
+                          <td className="pr-3">{e.cbamRelevant ? "yes" : "no"}</td>
+                          <td className="pr-3">{l.trl}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <div className="mt-6">
+                  <p className="text-sm font-medium mb-2">Marginal abatement cost (ex-CBAM revenue) vs the {s.year} certificate price</p>
+                  <div className="h-72">
+                    <ResponsiveContainer>
+                      <BarChart data={macData} layout="vertical" margin={{ left: 8, right: 24 }}>
+                        <CartesianGrid horizontal={false} stroke="var(--line)" />
+                        <XAxis type="number" tick={AXIS} tickFormatter={(v) => `€${v}`} tickLine={false} />
+                        <YAxis type="category" dataKey="name" tick={{ ...AXIS, fontSize: 11 }} width={150} tickLine={false} />
+                        <Tooltip {...TIP} formatter={(v: number) => `${eur(v)}/tCO₂`} />
+                        <ReferenceLine x={price} stroke="var(--s2)" strokeDasharray="4 4" label={{ value: `certificate ${eur(price)}`, fill: "var(--ink-2)", fontSize: 11, position: "top" }} />
+                        <ReferenceLine x={0} stroke="var(--ink-3)" />
+                        <Bar dataKey="mac" name="€/tCO₂" fill="var(--s1)" radius={4} isAnimationActive={false} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <p className="text-xs text-ink-3 mt-2">Levers left of the dashed line cost less per tonne of CO₂ than buying certificates. Only levers that cut direct emissions avoid steel CBAM.</p>
+                </div>
+              </Card>
+              {sector === "steel" && <H2OptionCard s={s} />}
+            </Tabs.Content>
+            <Tabs.Content value="trade" className="space-y-6">
+              {sector === "steel" && <OptimiserCard key={p.id} p={p} s={s} />}
+              {sector !== "steel" && <p className="text-sm text-ink-2">Plant-level allocation is modelled for steel producers. Switch the sector to steel to see it.</p>}
+            </Tabs.Content>
+            <Tabs.Content value="timeline" className="space-y-6">
+              <Card title="Timeline: law today vs proposals">
+                <ol className="text-sm space-y-2">
+                  {[
+                    ["1 Oct 2023 – 31 Dec 2025", "Transitional period: reporting only, no payment.", "law"],
+                    ["1 Jan 2026", "Definitive regime: authorised declarants, 50 t de minimis (Omnibus Reg. 2025/2083), defaults + 10% mark-up.", "law"],
+                    ["7 Apr / 6 Jul / 5 Oct 2026", "Quarterly certificate prices: €75.36, €75.28, €82.32.", "law"],
+                    ["1 Jul 2026", "EU steel safeguard replaced by tariff-rate quotas: India ≈ 2.8 Mt, 50% tariff above quota; CBAM applies within quota.", "law"],
+                    ["17 Jul 2026", "COM(2026) 616 (ETS Phase 5) proposes reintroducing 15% of phased-out free allocation from 2028 and ending the phase-out in 2038.", "proposal"],
+                    ["2027", "Certificate sales from 1 Feb; weekly pricing; 50% quarterly holding; 2026 declaration due 30 Sep 2027; mark-up 20%.", "law"],
+                    ["2028", "Mark-up reaches 30%; extension to ~180 downstream steel and aluminium goods proposed.", "proposal"],
+                    ["2030 → 2034", "Free allocation falls 77.5% → 51.5% → 0%: the cash cliff.", "law"],
+                  ].map(([d, t, k]) => (
+                    <li key={d} className="grid grid-cols-[150px_1fr] gap-3">
+                      <span className="text-ink-3">{d}</span>
+                      <span>{t} <span className={`ml-1 text-[10px] uppercase rounded px-1 border ${k === "law" ? "border-s1 text-s1" : "border-s2 text-s2"}`}>{k}</span></span>
+                    </li>
+                  ))}
+                </ol>
+              </Card>
+            </Tabs.Content>
+          </Tabs.Root>
         </div>
       </div>
     </div>

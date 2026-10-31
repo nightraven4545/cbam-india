@@ -1,6 +1,6 @@
 import type { Confidence } from "@/lib/data";
 
-export const eur = (n: number, d = 0) => `€${n.toLocaleString("en-IN", { maximumFractionDigits: d, minimumFractionDigits: d })}`;
+export const eur = (n: number, d = 0) => `${n < 0 ? "−" : ""}€${Math.abs(n).toLocaleString("en-IN", { maximumFractionDigits: d, minimumFractionDigits: d })}`;
 export const inr = (n: number) => `₹${Math.round(n).toLocaleString("en-IN")}`;
 export const m = (n: number) => `€${(n / 1e6).toLocaleString("en-IN", { maximumFractionDigits: 0 })}m`;
 export const pct = (n: number) => `${Math.round(n * 100)}%`;
@@ -13,8 +13,8 @@ export function Grade({ c }: { c: Confidence }) {
 
 export function Card({ title, sub, children }: { title: string; sub?: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-xl border border-line bg-surface p-4 sm:p-5">
-      <h2 className="font-semibold">{title}</h2>
+    <section className="rounded-[10px] border border-line bg-surface p-4 sm:p-6">
+      <h2 className="font-cond text-lg sm:text-xl font-semibold leading-snug">{title}</h2>
       {sub && <p className="text-sm text-ink-2 mt-1">{sub}</p>}
       <div className="mt-4">{children}</div>
     </section>

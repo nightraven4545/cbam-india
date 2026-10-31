@@ -1,36 +1,26 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import "@fontsource/ibm-plex-sans/400.css";
+import "@fontsource/ibm-plex-sans/500.css";
+import "@fontsource/ibm-plex-sans/600.css";
+import "@fontsource/ibm-plex-sans-condensed/500.css";
+import "@fontsource/ibm-plex-sans-condensed/600.css";
+import "@fontsource/ibm-plex-sans-condensed/700.css";
 import "./globals.css";
+import Nav from "@/components/Nav";
 
 export const metadata: Metadata = {
-  title: "CBAM India: Carbon Border Exposure",
-  description: "How the EU Carbon Border Adjustment Mechanism hits Indian steel exporters, what verified data is worth, and which decarbonisation levers pay back.",
+  title: { default: "CBAM India: what Europe's carbon border costs Indian industry", template: "%s · CBAM India" },
+  description: "An engagement-style analysis of the EU Carbon Border Adjustment Mechanism for Indian steel, aluminium and cement: exposure, levers, policy and a roadmap.",
 };
-
-const NAV = [
-  { href: "/", label: "Model" },
-  { href: "/policy", label: "Policy & MSMEs" },
-  { href: "/analysis", label: "Analysis" },
-  { href: "/deck", label: "Deck" },
-  { href: "/markets", label: "Carbon markets" },
-  { href: "/methodology", label: "Methodology" },
-];
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
       <body className="antialiased min-h-screen">
-        <header className="border-b border-line bg-surface/80 backdrop-blur sticky top-0 z-20 print:hidden">
-          <nav className="mx-auto max-w-6xl px-4 h-14 flex items-center gap-6 overflow-x-auto">
-            <Link href="/" className="font-semibold whitespace-nowrap">CBAM<span className="text-ink-3">·</span>India</Link>
-            {NAV.map((n) => (
-              <Link key={n.href} href={n.href} className="text-sm text-ink-2 hover:text-ink whitespace-nowrap">{n.label}</Link>
-            ))}
-          </nav>
-        </header>
-        <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
-        <footer className="mx-auto max-w-6xl px-4 py-10 text-xs text-ink-3 border-t border-line print:hidden">
-          Built by Shreshtha · Data as of 31 Oct 2026 · Figures graded A–E by confidence; D-grade producer inputs are estimates, not company disclosures. Not investment advice.
+        <Nav />
+        <main className="mx-auto max-w-[1240px] px-4 py-8 sm:py-10">{children}</main>
+        <footer className="mx-auto max-w-[1240px] px-4 py-8 text-xs text-ink-3 border-t border-line print:hidden">
+          Prepared by Shreshtha, 31 Oct 2026. Producer inputs are graded A–E for confidence; grade D values are analyst estimates, not company disclosures. Not investment advice.
         </footer>
       </body>
     </html>

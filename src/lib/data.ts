@@ -238,3 +238,14 @@ export const DOWNSTREAM: Downstream[] = [
   { hs: "7610", product: "Aluminium structures", usdM: 9.5, kt: 1.3, metal: "aluminium", metalShare: 0.95, status: "inScope", cluster: "Gujarat" },
   { hs: "7217", product: "Wire of iron or non-alloy steel", usdM: 2.4, kt: 1.8, metal: "steel", metalShare: 1, status: "inScope", cluster: "Gujarat, Punjab" },
 ];
+
+// EU imports of CBAM iron & steel from India by CN heading, 2025, kt (Eurostat Comext DS-045409 via cbamguide.com/countries/india).
+export const EU_STEEL_BY_CN = [
+  { cn: "7210 coated flat", kt: 833 },
+  { cn: "7208 hot-rolled flat", kt: 790 },
+  { cn: "7209 cold-rolled flat", kt: 478 },
+  { cn: "7206 ingots", kt: 280 },
+  { cn: "7207 semi-finished", kt: 266 },
+  { cn: "Other (bars, tubes, alloy)", kt: 1363 },
+];
+export const EU_STEEL_TOTAL_KT = 4010;
