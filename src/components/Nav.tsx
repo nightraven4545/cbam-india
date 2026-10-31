@@ -13,6 +13,7 @@ const NAV = [
   { href: "/markets", label: "Carbon markets" },
   { href: "/deck", label: "Deck" },
   { href: "/methodology", label: "Methodology" },
+  { href: "/sources", label: "Sources" },
 ];
 
 export default function Nav() {

@@ -5,13 +5,18 @@ export interface Sourced { value: number; confidence: Confidence; source: string
 const d = (value: number, confidence: Confidence, source: string): Sourced => ({ value, confidence, source });
 
 const S = {
-  defaults: "Implementing Reg. (EU) 2025/2621 Annex, as replaced by (EU) 2026/1740 (via cbamguide.com)",
+  defaults: "Implementing Reg. (EU) 2026/1740 Annex (EUR-Lex OJ L 2026/1740), India: 7207 4.270, 7208/7209/7210 4.280",
   bench: "Implementing Reg. (EU) 2025/2620 Annex, Column B (EUR-Lex OJ L 2025/2620)",
   alDefault: "Argus Media, 'EU lowers CBAM benchmarks for aluminium' (India 1.87 t), consistent with cbamguide.com",
   are: "Asia Research & Engagement, 'The CBAM Test: Indian Steel's Future in Europe' (1 Sep 2026)",
   ccts: "CCTS draft GHG-intensity target schedule, FY2023-24 plant baselines (MoEFCC/BEE); direct share 0.85 assumed",
   jsw26: "JSW Steel Q4FY26 press release (14 May 2026): 30.14 Mt crude steel, reported EBITDA ₹29,821 cr (≈₹9,900/t)",
   sail26: "SAIL FY26 results: 19.43 Mt crude steel, EBITDA ₹13,146 cr (≈₹6,765/t)",
+  tata26: "Tata Steel FY26 production release (Apr 2026): India crude steel 23.48 Mt; India EBITDA/t ₹15,907 (4QFY26), ₹19,162 (1QFY27)",
+  jspl26: "Jindal Steel Q4FY26 earnings presentation: FY26 production 9.25 Mt; adjusted EBITDA ₹10,482/t",
+  amns: "Ministry of Steel Annual Report 2025-26: AM/NS 2024-25 production 7.36 Mt; Hazira capacity 9.6 Mtpa (expanding to 15 Mtpa, 2H 2026)",
+  hindalco26: "Hindalco Q4FY26 results: Aluminium Upstream EBITDA $1,583/t (FY26)",
+  vedanta26: "Vedanta Aluminium FY26: production 2.45 Mt; EBITDA $1,171/t",
   euAl: "Eurostat Comext 2025: 313 kt Indian aluminium to EU (via cbamguide.com); split by producer estimated",
   est: "Analyst estimate from FY26 results/annual reports; illustrative, edit before relying on it",
 };
@@ -74,15 +79,15 @@ export const PRODUCERS: Producer[] = [
   },
   {
     id: "tata", name: "Tata Steel (India)", sector: "steel", route: "BF-BOF (Jamshedpur, Kalinganagar)", routeShares: [1, 0, 0],
-    production: d(22, "D", S.est), euVolume: d(0.9, "D", S.are + " (derived from €90–130m 2030 cost)"),
+    production: d(23.48, "C", S.tata26), euVolume: d(0.9, "D", S.are + " (derived from €90–130m 2030 cost)"),
     actualDirect: d(2.01, "D", S.ccts + " (Jamshedpur 2.363)"), indirect: d(0.3, "D", S.est),
-    ebitdaEUR: d(130, "D", "Tata Steel India EBITDA/t ≈ ₹13–19k in FY26 quarters; export margin assumed lower"),
+    ebitdaEUR: d(150, "C", S.tata26 + "; ≈₹15,000/t used (India average; export margin may be lower)"),
     note: "Most efficient Indian BF-BOF, yet still about 0.65 t above the 2026 free allocation.",
     plants: [{ name: "Jamshedpur", capacity: 11, intensity: 2.01, driShare: 0 }, { name: "Kalinganagar", capacity: 8, intensity: 1.9, driShare: 0 }, { name: "Meramandali", capacity: 5.6, intensity: 2.4, driShare: 0.3 }], // D: CCTS plant baselines × 0.85; capacities from company reports, rounded
   },
   {
     id: "amns", name: "AM/NS India", sector: "steel", route: "Gas/coal DRI-EAF + BF (Hazira)", routeShares: [0.5, 0.5, 0],
-    production: d(8.5, "D", S.est), euVolume: d(0.7, "D", S.est),
+    production: d(7.36, "C", S.amns), euVolume: d(0.7, "D", S.est),
     actualDirect: d(2.2, "D", S.est), indirect: d(0.4, "D", S.est),
     ebitdaEUR: d(90, "D", S.est),
     note: "Its DRI share lowers the benchmark (0.481 vs 1.370), so it gets less free allocation than a BF-BOF peer with the same emissions.",
@@ -90,9 +95,9 @@ export const PRODUCERS: Producer[] = [
   },
   {
     id: "jspl", name: "Jindal Steel (JSPL)", sector: "steel", route: "Coal-gas DRI + BF (Angul, Raigarh)", routeShares: [0.5, 0.5, 0],
-    production: d(8.5, "D", S.est), euVolume: d(0.5, "D", S.are + " (derived from €60–80m 2030 cost)"),
+    production: d(9.25, "C", S.jspl26), euVolume: d(0.5, "D", S.are + " (derived from €60–80m 2030 cost)"),
     actualDirect: d(2.64, "D", S.ccts + " (Angul 2.95–3.21 range)"), indirect: d(0.4, "D", S.est),
-    ebitdaEUR: d(115, "D", S.est),
+    ebitdaEUR: d(105, "C", S.jspl26 + " (₹100/€)"),
     note: "Coal-based DRI combines high intensity with a low route benchmark, giving the steepest unit exposure.",
     plants: [{ name: "Angul", capacity: 9, intensity: 2.64, driShare: 0.5 }, { name: "Raigarh", capacity: 3.6, intensity: 2.85, driShare: 0.6 }], // D: CCTS plant baselines × 0.85; capacities from company reports, rounded
   },
@@ -106,23 +111,23 @@ export const PRODUCERS: Producer[] = [
   },
   {
     id: "vedanta", name: "Vedanta Aluminium", sector: "aluminium", route: "Primary smelting on captive coal power (Jharsuguda, BALCO)", routeShares: [1, 0],
-    production: d(2.4, "C", "Vedanta annual report: ~2.4 Mt aluminium"), euVolume: d(0.15, "D", S.euAl),
+    production: d(2.45, "C", S.vedanta26), euVolume: d(0.15, "D", S.euAl),
     actualDirect: d(1.8, "D", "Anode consumption + PFC; IAI global direct average ≈1.6–2.0 t"), indirect: d(14.5, "D", "≈14.5 MWh/t × captive coal ≈1.0 t/MWh"),
-    ebitdaEUR: d(750, "D", S.est),
+    ebitdaEUR: d(1084, "C", S.vedanta26 + " ($1.08/€)"),
     note: "About 20 t CO₂/t corporate footprint, of which only about 1.8 t (anode/PFC) is CBAM-priced today.",
   },
   {
     id: "hindalco", name: "Hindalco (India Al)", sector: "aluminium", route: "Primary smelting on captive coal (Renukoot, Mahan, Aditya)", routeShares: [1, 0],
     production: d(1.35, "C", "Hindalco annual report: ~1.3–1.4 Mt primary aluminium"), euVolume: d(0.1, "D", S.euAl),
     actualDirect: d(1.7, "D", "Anode + PFC estimate"), indirect: d(14, "D", "Captive coal power estimate"),
-    ebitdaEUR: d(800, "D", S.est),
+    ebitdaEUR: d(1466, "C", S.hindalco26 + " ($1.08/€)"),
     note: "Downstream (Novelis) diversification softens the exposure; India primary metal is the CBAM-relevant part.",
   },
   {
     id: "nalco", name: "NALCO", sector: "aluminium", route: "Integrated bauxite–alumina–smelter, captive coal (Angul)", routeShares: [1, 0],
     production: d(0.46, "C", "NALCO annual report: ~0.46 Mt metal"), euVolume: d(0.06, "D", S.euAl),
     actualDirect: d(1.75, "D", "Anode + PFC estimate"), indirect: d(14.5, "D", "Captive coal power estimate"),
-    ebitdaEUR: d(850, "D", S.est),
+    ebitdaEUR: d(1100, "D", "Estimate between Vedanta and Hindalco FY26 margins"),
     note: "A low-cost integrated PSU; the indirect-emissions risk dominates.",
   },
   {

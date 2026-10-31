@@ -14,6 +14,13 @@ import { DEFAULT_SCENARIO, cumulativeExposure, leverEconomics, producerSummary, 
 import { cbamFactor, defaultMarkup } from "@/lib/cbam";
 
 const CUSTOM_ID = "custom";
+// One-click scenarios; each one is also a shareable URL through the state mirror below.
+const PRESETS: { label: string; hint: string; s: Partial<Scenario> }[] = [
+  { label: "Base", hint: "€82.32 growing 3%/yr, 50% pass-through, law in force", s: {} },
+  { label: "Bear", hint: "Price ~€130 by 2030 (+12%/yr), exporter absorbs 70%", s: { growth: 0.12, passThrough: 0.7 } },
+  { label: "Bull", hint: "COM(2026) 616 adopted, price falls 5%/yr, 35% pass-through", s: { growth: -0.05, passThrough: 0.35, regime: "proposal" } },
+  { label: "India €20", hint: "Explicit €20/t Indian carbon price credited under Article 9", s: { originCarbonPrice: 20 } },
+];
 const URL_KEYS = ["year", "basePrice", "growth", "passThrough", "originCarbonPrice", "fx"] as const;
 
 function customProducer(sector: Sector, c: { intensity: number; vol: number; ebitda: number }): Producer {
@@ -144,6 +151,19 @@ export default function Dashboard() {
               <Slider label="EBITDA on EU sales (€/t)" value={custom.ebitda} min={20} max={sector === "steel" ? 250 : sector === "cement" ? 40 : 1500} step={5} fmt={(v) => eur(v)} onChange={(v) => setCustom((c) => ({ ...c, ebitda: v }))} />
             </div>
           )}
+          <fieldset>
+            <legend className="text-sm text-ink-2 mb-1.5">Scenario preset</legend>
+            <div className="grid grid-cols-2 gap-1.5">
+              {PRESETS.map((pr) => {
+                const target = { ...DEFAULT_SCENARIO, year: s.year, fx: s.fx, includeIndirect: s.includeIndirect, ...pr.s };
+                const active = (Object.keys(target) as (keyof Scenario)[]).every((k) => target[k] === s[k]);
+                return (
+                  <button key={pr.label} type="button" title={pr.hint} aria-pressed={active} onClick={() => setS(target)}
+                    className={`rounded-md border px-2 py-1.5 text-sm ${active ? "bg-ink text-bg border-ink" : "border-line text-ink-2 hover:border-ink-3"}`}>{pr.label}</button>
+                );
+              })}
+            </div>
+          </fieldset>
           <Slider label="Year" value={s.year} min={2026} max={2034} step={1} fmt={String} onChange={set("year")} />
           <Slider label="Certificate price 2026 (€/t)" value={s.basePrice} min={50} max={150} step={0.01} fmt={(v) => eur(v, 2)} onChange={set("basePrice")} />
           <Slider label="Price growth / yr" value={s.growth} min={-0.05} max={0.1} step={0.01} fmt={pct} onChange={set("growth")} />

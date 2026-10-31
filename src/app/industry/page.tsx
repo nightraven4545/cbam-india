@@ -106,7 +106,7 @@ export default function Industry() {
           source="Steel and aluminium are Annex II goods (direct emissions only); cement includes indirect. Intensities grade D (IAI ranges, BRSR on an OPC basis)."
           table={{ columns: ["Producer", "Charged", "Not charged"], rows: foot.map((x) => [x.name, x.charged, x.uncharged]) }}>
           <Footprint data={foot} />
-          <p className="text-sm text-ink-2 mt-3">If the EU adds indirect emissions for aluminium, Indian smelters on captive coal would face roughly €1,200/t, more than their EBITDA. Test it in the <Link href="/model?sector=aluminium&p=vedanta&indirect=1" className="text-s1 underline underline-offset-2">model</Link>.</p>
+          <p className="text-sm text-ink-2 mt-3">If the EU adds indirect emissions for aluminium, Indian smelters on captive coal would face roughly €1,200/t: most or all of a record FY26 margin of €1,100–1,500/t. Test it in the <Link href="/model?sector=aluminium&p=vedanta&indirect=1" className="text-s1 underline underline-offset-2">model</Link>.</p>
         </Exhibit>
       </div>
     </div>

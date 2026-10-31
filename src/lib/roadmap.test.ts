@@ -23,3 +23,18 @@ describe("value at stake", () => {
     expect(Object.keys(b[0])).toContain("JSW Steel");
   });
 });
+
+import { SOURCES } from "./sources";
+import { PRODUCERS as P2 } from "./data";
+describe("sources", () => {
+  it("registry ids are unique and every URL is https", () => {
+    expect(new Set(SOURCES.map((s) => s.id)).size).toBe(SOURCES.length);
+    expect(SOURCES.every((s) => s.url.startsWith("https://"))).toBe(true);
+  });
+  it("every producer input carries a source and a valid grade", () => {
+    for (const p of P2) for (const k of ["production", "euVolume", "actualDirect", "indirect", "ebitdaEUR"] as const) {
+      expect(p[k].source.length).toBeGreaterThan(5);
+      expect("ABCDE").toContain(p[k].confidence);
+    }
+  });
+});
