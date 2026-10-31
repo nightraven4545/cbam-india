@@ -4,6 +4,9 @@ import { Exhibit } from "@/components/consulting/Exhibit";
 import MiniWaterfall from "@/components/pages/MiniWaterfall";
 import { Prioritisation } from "@/components/pages/RoadmapCharts";
 import { facts, initiatives, type Initiative } from "@/lib/storyline";
+import { HarveyTable } from "@/components/consulting/exhibits";
+import { leverAssessment } from "@/lib/exhibits";
+import { DEFAULT_SCENARIO } from "@/lib/model";
 
 export const metadata: Metadata = { title: "Roadmap", description: "Value at stake, prioritised initiatives and a three-horizon roadmap for responding to EU CBAM." };
 
@@ -18,6 +21,9 @@ export default function Roadmap() {
   const ins = initiatives();
   const num = new Map(ins.map((x, i) => [x.id, i + 1]));
   const points = ins.map((x) => ({ name: `${num.get(x.id)}. ${x.name}`, label: String(num.get(x.id)), x: x.ease, y: Math.log10(Math.max(10, x.impact)), z: 1, tone: TONE[x.owner] }));
+  const jsw = f.jsw.p;
+  const assess = leverAssessment(jsw, DEFAULT_SCENARIO, { dedicatedEU: false, cctsPrice: 0, greenPremium: 0, discount: 0.1 });
+  const allRound = assess.filter((a) => Math.min(...a.scores) >= 2).map((a) => a.l.name.split(" (")[0]);
   const quick = ins.filter((x) => x.ease >= 3 && x.impact >= 300).map((x) => num.get(x.id)).join(", ");
 
   return (
@@ -47,7 +53,14 @@ export default function Roadmap() {
           </div>
         </Exhibit>
 
-        <Exhibit n={3} title="The roadmap: start with data, contracts and routing now; build the policy case in parallel; hold hydrogen as an option for after 2030"
+        <Exhibit n={3} title={`${allRound.length === 1 ? `${allRound[0]} is the only steel lever` : `${allRound.length} levers`} scoring medium or better on every test; deep-cut levers matter most for CBAM but are costly and immature`}
+          subtitle={`Steel decarbonisation levers scored 0–4 on five criteria, ${jsw.name} as the reference producer, base scenario`}
+          source="Scores derived from the model: CBAM relevance from the direct cut; cost from MAC against the 2030 certificate price; payback from 10%-discounted cash flows; maturity from TRL (IEA); capex per tonne of capacity. Lever data grade D (IEA, MoS, TERI)."
+          table={{ columns: ["Lever", "CBAM relevance", "Cost vs certificate", "Payback", "Maturity", "Capex-light"], rows: assess.map((a) => [a.l.name, ...a.scores]) }}>
+          <HarveyTable rows={assess.map((a) => ({ id: a.l.id, name: a.l.name, scores: a.scores }))} />
+        </Exhibit>
+
+        <Exhibit n={4} title="The roadmap: start with data, contracts and routing now; build the policy case in parallel; hold hydrogen as an option for after 2030"
           subtitle="Initiatives by owner and horizon, with the first 90 days of work"
           table={{ columns: ["#", "Initiative", "Owner", "Horizon", "First 90 days", "KPI"], rows: ins.map((x) => [num.get(x.id)!, x.name, x.owner, x.horizon, x.first90, x.kpi]) }}>
           <div tabIndex={0} className="overflow-x-auto">
@@ -74,7 +87,7 @@ export default function Roadmap() {
           </div>
         </Exhibit>
 
-        <Exhibit n={4} title="Six KPIs tell the steering committee whether the response is on track"
+        <Exhibit n={5} title="Six KPIs tell the steering committee whether the response is on track"
           subtitle="Tracked quarterly; targets are proposals for discussion">
           <div tabIndex={0} className="overflow-x-auto">
             <table className="dtable">

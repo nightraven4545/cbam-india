@@ -31,7 +31,20 @@ Last updated: 31 Oct 2026.
   - Excel model (static route, live formulas); case study; OG image; one-page PDF (public/); deck Present mode.
   - 33 tests.
 
+- v4 (feedback: more symbols, flags and logos; a scannable Approach; signature consulting exhibits; better ESG/markets):
+  - A, visual language: lucide icons, country flags, company logos (fetched at prebuild on Vercel, monogram fallback), Delta/RAG/Harvey indicators.
+  - C, Approach: tree diagram with a drawer, hypothesis scorecard, workflow, takeaways and a sticky contents panel.
+  - B, consultant exhibits (`src/lib/exhibits.ts`, `src/components/consulting/exhibits.tsx`, all computed and tested):
+    - Mekko of EU flat-steel imports (/industry);
+    - heatmap and football field (/industry);
+    - executive RAG scorecard (/);
+    - value-driver tree, true MACC and Harvey lever assessment (/model);
+    - Harvey assessment (/roadmap).
+  - 38 tests.
+  - D, ESG & carbon markets module (/esg): next.
+
 ## Next
+- v4 D: ESG module; then a ₹/€ toggle and takeaways/contents panels on the other long pages.
 - Vercel import (manual, see above).
 - Q4 2026 price on 4 Jan 2027; weekly prices from 2027.
 - India defaults for 7209/7210 equal 7208 (4.280), so product mix only matters via benchmarks (not modelled).
@@ -53,5 +66,8 @@ Last updated: 31 Oct 2026.
 - Wide exhibits (Gantt, swimlane, waterfall) scroll inside their frame on mobile; Exhibit has min-w-0.
 - Many sites are blocked by the session network; fetch them via firecrawl.
 - Producer intensities are D-grade (CCTS plant baselines × 0.85 direct share); see Methodology.
+- Mekko origins: only Türkiye, Korea and India flat-steel volumes are published (EUROFER 2025, ~23.1 Mt); the rest is one "Other origins" block. Türkiye uses its bars/rods default as a proxy.
+- Absolutely positioned children (sr-only) inside scroll boxes need a `relative` wrapper or they widen the page on mobile.
+- Logo img errors can fire before hydration; Logo checks `naturalWidth` after mount.
 - Do not `pkill -f` with a pattern that also matches your own shell command.
 - Commits: author `Shreshtha <77679539+nightraven4545@users.noreply.github.com>`, no AI co-author trailers.

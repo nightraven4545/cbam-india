@@ -7,6 +7,8 @@ import MiniWaterfall from "@/components/pages/MiniWaterfall";
 import { annualBill } from "@/lib/roadmap";
 import { facts } from "@/lib/storyline";
 import { DirectIcon, VerifiedIcon, EuroIcon } from "@/components/visual/icons";
+import { Scorecard } from "@/components/consulting/exhibits";
+import { SCORECARD_RULES, scorecard } from "@/lib/exhibits";
 
 export default function Summary() {
   const f = facts();
@@ -15,6 +17,9 @@ export default function Summary() {
   const names = f.sums.map((x) => x.p.name);
   const verifyStep = -f.vas.steps[1].value;
   const share = Math.round((verifyStep / f.vas.doNothing) * 100);
+  const sc = scorecard();
+  const reds = sc.map((r) => ({ name: r.p.name, n: Object.values(r.cells).filter((c) => c.level === "red").length })).sort((a, b) => b.n - a.n);
+  const allRedPenalty = sc.filter((r) => r.cells.penalty.level !== "green").length;
   const recs = [
     { title: "Verify every EU-bound tonne now", body: `Accredited, installation-level emissions data replaces India's punitive default. It is worth ${m(f.verification)} a year to EU buyers of the five largest exporters.`, value: bn(verifyStep), when: "Next 6 months", owner: "Producers", href: "/roadmap" },
     { title: "Reprice the risk in EU contracts", body: "Index CBAM cost-sharing to the certificate price instead of conceding full pass-through. Back it with a verified-intensity warranty.", value: "Margin protection", when: "Next contract round", owner: "Producers", href: "/model" },
@@ -61,7 +66,14 @@ export default function Summary() {
           </div>
         </Panel>
 
-        <Exhibit n={2} title={`Five moves cut the 2026–34 bill from ${bn(f.vas.doNothing)} to ${bn(f.vas.residual)}; verification alone does ${share}% of the work`}
+        <Exhibit n={2} title={`${reds[0].name} flags red on ${reds[0].n} of ${SCORECARD_RULES.length} risk dimensions; staying on defaults is a material cost for ${allRedPenalty} of ${sc.length} producers`}
+          subtitle="Executive scorecard: five largest steel exporters, red / amber / green on exposure, margin, data, route and cliff risk"
+          source={<>Model outputs (100% pass-through unless stated, €82.32 growing 3%/yr, law in force). Thresholds: {SCORECARD_RULES.map((r) => `${r.label}: ${r.rule}`).join("; ")}.</>}
+          table={{ columns: ["Producer", ...SCORECARD_RULES.map((r) => r.label)], rows: sc.map((r) => [r.p.name, ...SCORECARD_RULES.map((k) => `${r.cells[k.k].level} (${(+r.cells[k.k].v.toFixed(2))})`)]) }}>
+          <Scorecard rows={sc} />
+        </Exhibit>
+
+        <Exhibit n={3} title={`Five moves cut the 2026–34 bill from ${bn(f.vas.doNothing)} to ${bn(f.vas.residual)}; verification alone does ${share}% of the work`}
           subtitle="Cumulative CBAM paid to the EU 2026–34, € million, steps applied in sequence so nothing is double-counted"
           source="Model outputs; efficiency −0.2 tCO₂/t from 2027, scrap + biochar −0.25 from 2028, Article 9 credit at an explicit €20/t on 60% of exports. Details on the Roadmap page."
           table={{ columns: ["Step", "€ million"], rows: f.vas.steps.map((s) => [s.label, Math.round(s.value / 1e6)]) }}>

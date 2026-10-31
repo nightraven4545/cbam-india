@@ -1,11 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { LOGO_SOURCES, MONOGRAM } from "@/lib/logos";
 
 // Small company mark: self-hosted favicon if the build fetched it, else a brand-colour monogram.
 export function Logo({ id, name, size = 20 }: { id: string; name: string; size?: number }) {
   const [failed, setFailed] = useState(!LOGO_SOURCES[id]);
+  const ref = useRef<HTMLImageElement>(null);
+  // The server-rendered <img> can fail before React attaches onError; check once after hydration.
+  useEffect(() => { const i = ref.current; if (i && i.complete && i.naturalWidth === 0) setFailed(true); }, []);
   const mono = MONOGRAM[id] ?? { text: name.slice(0, 2).toUpperCase(), bg: "#5c6b7a" };
   if (failed) {
     return (
@@ -15,7 +18,7 @@ export function Logo({ id, name, size = 20 }: { id: string; name: string; size?:
   }
   return (
     // eslint-disable-next-line @next/next/no-img-element
-    <img src={`/logos/${id}.png`} alt="" aria-hidden width={size} height={size} onError={() => setFailed(true)}
+    <img ref={ref} src={`/logos/${id}.png`} alt="" aria-hidden width={size} height={size} onError={() => setFailed(true)}
       className="inline-block shrink-0 rounded-[4px] bg-white object-contain" style={{ width: size, height: size }} />
   );
 }

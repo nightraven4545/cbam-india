@@ -6,7 +6,9 @@ import { Exhibit } from "@/components/consulting/Exhibit";
 import { ExposureMatrix, Flows, Footprint, GapChart, RouteMix, Spark } from "@/components/pages/IndustryCharts";
 import { EU_STEEL_BY_CN, EU_STEEL_TOTAL_KT, PRODUCERS, benchmarkFor } from "@/lib/data";
 import { DEFAULT_SCENARIO as S, producerCost, producerSummary, trajectory } from "@/lib/model";
-import { cbamFactor } from "@/lib/cbam";
+import { YEARS, cbamFactor } from "@/lib/cbam";
+import { FootballField, Heatmap, Mekko } from "@/components/consulting/exhibits";
+import { EU_FLAT_IMPORTS_2025, FIELD_SCENARIOS, footballField, mekko } from "@/lib/exhibits";
 
 export const metadata: Metadata = { title: "Industry & players", description: "Who is exposed to EU CBAM among Indian steel, aluminium and cement producers, and why." };
 
@@ -38,6 +40,10 @@ export default function Industry() {
   const foot = PRODUCERS.filter((p) => p.sector !== "steel").map((p) => ({
     name: p.name, charged: p.sector === "cement" ? p.actualDirect.value + p.indirect.value : p.actualDirect.value, uncharged: p.sector === "cement" ? 0 : p.indirect.value,
   }));
+  const mk = mekko(2030), mkIn = mk.find((c) => c.flag === "IN")!, mkKr = mk.find((c) => c.flag === "KR")!;
+  const heat = rows.map(({ p, t }) => ({ id: p.id, name: p.name, values: t.map((x) => x.actual) }));
+  const ff = footballField(2030);
+  const ffTop = [...ff].sort((a, b) => b.hi - a.hi)[0];
   const al = foot.filter((x) => x.uncharged > 1);
   const alShare = al.reduce((a, x) => a + x.charged / (x.charged + x.uncharged), 0) / al.length;
 
@@ -54,7 +60,14 @@ export default function Industry() {
           <Flows nodes={nodes} links={links} />
         </Exhibit>
 
-        <Exhibit n={2} title={`${list(danger)} ${danger.length === 1 ? "sits" : "sit"} in the danger quadrant: high 2030 cost per tonne and the thinnest margin to absorb it`}
+
+        <Exhibit n={2} title={`India is a mid-sized EU supplier whose verified cost (${eur(mkIn.verified!)}/t) is close to Korea's (${eur(mkKr.verified!)}/t), but on defaults it pays ${eur(mkIn.penalty!)}/t more in 2030`}
+          subtitle="EU flat-steel imports by origin, 2025: column width = share of the ~23 Mt market; height = 2030 CBAM cost per tonne at 100% pass-through"
+          source={<>{EU_FLAT_IMPORTS_2025.source} (grade C). Intensities and benchmarks from the delivered-cost peer set (grade D). Türkiye has no published flat-steel default; its bars/rods default is used as a proxy. Model at €82.32 growing 3%/yr, law in force.</>}
+          table={{ columns: ["Origin", "Mt", "Share", "Verified €/t", "Extra on defaults €/t"], rows: mk.map((c) => [c.name, +c.mt.toFixed(2), `${Math.round(c.share * 100)}%`, c.verified === null ? "n/a" : Math.round(c.verified), c.penalty === null ? "n/a" : Math.round(c.penalty)]) }}>
+          <Mekko cols={mk} year={2030} />
+        </Exhibit>
+        <Exhibit n={3} title={`${list(danger)} ${danger.length === 1 ? "sits" : "sit"} in the danger quadrant: high 2030 cost per tonne and the thinnest margin to absorb it`}
           subtitle="2030 verified CBAM cost per tonne (100% pass-through) against EBITDA per tonne; bubble size = EU volume"
           source="Model at €82.32 growing 3%/yr, law-in-force phase-out. EBITDA: JSW and SAIL FY26 results (grade C); others estimated (grade D)."
           table={{ columns: ["Producer", "2030 €/t", "EBITDA €/t", "EU Mt"], rows: points.map((p) => [p.name, Math.round(p.x), p.y, p.z]) }}>
@@ -62,7 +75,7 @@ export default function Industry() {
         </Exhibit>
 
         <div className="grid gap-6 lg:grid-cols-2">
-          <Exhibit n={3} title="Mixed-route producers carry DRI capacity that earns only the 0.481 t benchmark"
+          <Exhibit n={4} title="Mixed-route producers carry DRI capacity that earns only the 0.481 t benchmark"
             subtitle="Share of output by route (estimated)" source="Company reports; analyst estimates (grade D)."
             table={{ columns: ["Producer", "BF-BOF", "DRI-EAF"], rows: mix.map((x) => [x.name, x["BF-BOF"], x["DRI-EAF"]]) }}>
             <RouteMix data={mix} />
@@ -75,11 +88,25 @@ export default function Industry() {
           </Panel>
         </div>
 
-        <Exhibit n={4} title="By 2030 every producer pays on more than half of its emissions; the charged slice roughly doubles in four years"
+        <Exhibit n={5} title="By 2030 every producer pays on more than half of its emissions; the charged slice roughly doubles in four years"
           subtitle="Verified direct tCO₂ per tonne split into the part covered by free allocation and the part charged"
           source="Implementing Reg. 2025/2620 benchmarks; CBAM factor 97.5% (2026), 51.5% (2030); intensities grade D."
           table={{ columns: ["Producer", "Covered 2026", "Charged 2026", "Covered 2030", "Charged 2030"], rows: gap.map((g) => [g.name, g.covered2026, g.gap2026, g.covered2030, g.gap2030]) }}>
           <GapChart data={gap} />
+        </Exhibit>
+
+        <Exhibit n={6} title="The cost per tonne steps up in 2030 for every producer, and keeps climbing to 2034"
+          subtitle="Verified CBAM cost per tonne by producer and year, € (100% pass-through); darker = higher, 2030 outlined"
+          source="Model at €82.32 growing 3%/yr, law-in-force CBAM factor; intensities grade D."
+          table={{ columns: ["Producer", ...YEARS.map(String)], rows: heat.map((h) => [h.name, ...h.values.map((v) => Math.round(v))]) }}>
+          <Heatmap rows={heat} years={YEARS} highlight={2030} />
+        </Exhibit>
+
+        <Exhibit n={7} title={`${ff.every((r) => r.hi < r.onDefaults) ? "Even in the high-price case every producer stays below its base cost on defaults" : "In the high-price case some producers exceed their base cost on defaults"}; ${ffTop.p.name} has the widest range (${eur(ffTop.lo)}–${eur(ffTop.hi)}/t)`}
+          subtitle="2030 CBAM cost per tonne with verified data across four price and policy scenarios, against the base case on EU default values"
+          source={<>Scenarios: {FIELD_SCENARIOS.map((f) => f.label).join("; ")}. 100% pass-through.</>}
+          table={{ columns: ["Producer", "Low €/t", "Base €/t", "High €/t", "On defaults €/t"], rows: ff.map((r) => [r.p.name, Math.round(r.lo), Math.round(r.base), Math.round(r.hi), Math.round(r.onDefaults)]) }}>
+          <FootballField rows={ff.map((r) => ({ id: r.p.id, name: r.p.name, lo: r.lo, hi: r.hi, base: r.base, onDefaults: r.onDefaults }))} />
         </Exhibit>
 
         <section aria-labelledby="players">
@@ -102,7 +129,7 @@ export default function Industry() {
           </ul>
         </section>
 
-        <Exhibit n={5} title={`Aluminium's real footprint is about 16 t CO₂ per tonne, but CBAM prices only ~${Math.round(alShare * 100)}% of it today; cement is charged in full`}
+        <Exhibit n={8} title={`Aluminium's real footprint is about 16 t CO₂ per tonne, but CBAM prices only ~${Math.round(alShare * 100)}% of it today; cement is charged in full`}
           subtitle="tCO₂ per tonne of product: charged by CBAM today vs electricity emissions outside the charge"
           source="Steel and aluminium are Annex II goods (direct emissions only); cement includes indirect. Intensities grade D (IAI ranges, BRSR on an OPC basis)."
           table={{ columns: ["Producer", "Charged", "Not charged"], rows: foot.map((x) => [x.name, x.charged, x.uncharged]) }}>

@@ -14,6 +14,8 @@ import { CrossoverCard, RiskCard, TornadoCard } from "./Phase2Cards";
 import { H2OptionCard, OptimiserCard } from "./Phase3Cards";
 import { DEFAULT_SCENARIO, cumulativeExposure, leverEconomics, producerSummary, trajectory, type Scenario } from "@/lib/model";
 import { cbamFactor, defaultMarkup } from "@/lib/cbam";
+import { DriverTree, HarveyTable, Macc } from "./consulting/exhibits";
+import { driverTree, leverAssessment, macc } from "@/lib/exhibits";
 
 const CUSTOM_ID = "custom";
 // One-click scenarios; each one is also a shareable URL through the state mirror below.
@@ -120,7 +122,10 @@ export default function Dashboard() {
   const fill = (k: string) => (k === "cost" ? "var(--s2)" : k === "gain" ? "var(--s1)" : "var(--neutral)");
 
   const peer = PEER_DEFAULTS[sector].map((d) => ({ ...d, marked: d.value * (1 + defaultMarkup(s.year)) }));
-  const macData = levers.filter((x) => x.e.mac !== null).map((x) => ({ name: x.l.name.split(" (")[0], mac: Math.round(x.e.mac!) })).sort((a, b) => a.mac - b.mac);
+  const lopts = { dedicatedEU, cctsPrice, greenPremium, discount: 0.1 };
+  const curve = macc(p, s, lopts);
+  const assess = leverAssessment(p, s, lopts);
+  const tree = driverTree(p, s);
   const price = s.basePrice * Math.pow(1 + s.growth, s.year - 2026);
 
   return (
@@ -226,6 +231,9 @@ export default function Dashboard() {
                 </div>
                 <p className="text-sm text-ink-2">{p.note} EBITDA {eur(base)}/t<Grade c={p.ebitdaEUR.confidence} />, EU volume {p.euVolume.value} Mt<Grade c={p.euVolume.confidence} />.</p>
               </Card>
+              <Card title={`What drives ${p.name}'s CBAM hit? Value-driver tree (${s.year})`} sub={`Exporter's annual hit with verified data at ${pct(s.passThrough)} pass-through. Leaves show how much the hit moves if that driver rises 10%.`}>
+                <DriverTree root={tree} />
+              </Card>
               <Card title="Producer leaderboard" sub={`Year ${s.year}, ${pct(s.passThrough)} pass-through. "Cum." covers 2026–2034 at this pass-through. Click a row to select it.`}>
                 <button onClick={exportLeaderboard} className="mb-3 rounded-md border border-line px-3 py-1 text-xs hover:bg-bg">Download CSV</button>
                 <div tabIndex={0} className="overflow-x-auto">
@@ -321,22 +329,13 @@ export default function Dashboard() {
                   </table>
                 </div>
                 <div className="mt-6">
-                  <p className="text-sm font-medium mb-2">Marginal abatement cost (ex-CBAM revenue) vs the {s.year} certificate price</p>
-                  <div className="h-72">
-                    <ResponsiveContainer>
-                      <BarChart data={macData} layout="vertical" margin={{ left: 8, right: 24 }}>
-                        <CartesianGrid horizontal={false} stroke="var(--line)" />
-                        <XAxis type="number" tick={AXIS} tickFormatter={(v) => `€${v}`} tickLine={false} />
-                        <YAxis type="category" dataKey="name" tick={{ ...AXIS, fontSize: 11 }} width={150} tickLine={false} />
-                        <Tooltip {...TIP} formatter={(v: number) => `${eur(v)}/tCO₂`} />
-                        <ReferenceLine x={price} stroke="var(--s2)" strokeDasharray="4 4" label={{ value: `certificate ${eur(price)}`, fill: "var(--ink-2)", fontSize: 11, position: "top" }} />
-                        <ReferenceLine x={0} stroke="var(--ink-3)" />
-                        <Bar dataKey="mac" name="€/tCO₂" fill="var(--s1)" radius={4} isAnimationActive={false} />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                  <p className="text-xs text-ink-3 mt-2">Levers left of the dashed line cost less per tonne of CO₂ than buying certificates. Only levers that cut direct emissions avoid steel CBAM.</p>
+                  <p className="text-sm font-medium mb-2">Marginal abatement cost curve (ex-CBAM revenue) vs the {s.year} certificate price</p>
+                  <Macc bars={curve.bars} totalMt={curve.totalMt} price={curve.price} />
+                  <p className="text-xs text-ink-3 mt-2">Block width is tCO₂ cut per year on {p.name}&apos;s {p.euVolume.value} Mt of EU-bound output; height is the cost per tonne of CO₂. Blocks below the dashed line are cheaper than buying certificates. Grey blocks cut real emissions but not the CBAM bill.</p>
                 </div>
+              </Card>
+              <Card title="Lever assessment: what is worth doing first?" sub="Every score is derived from the model: CBAM relevance from the direct cut, cost from MAC against the 2030 certificate price, payback from cash flows, maturity from TRL, capex per tonne of capacity.">
+                <HarveyTable rows={assess.map((a) => ({ id: a.l.id, name: a.l.name, scores: a.scores }))} />
               </Card>
               {sector === "steel" && <H2OptionCard s={s} />}
             </Tabs.Content>
