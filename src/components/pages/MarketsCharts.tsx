@@ -1,6 +1,6 @@
 "use client";
 
-import { CartesianGrid, LabelList, Line, LineChart, ReferenceLine, ResponsiveContainer, Scatter, ScatterChart, Tooltip, XAxis, YAxis, Cell } from "recharts";
+import { CartesianGrid, LabelList, Line, LineChart, ReferenceLine, ResponsiveContainer, Scatter, ScatterChart, Tooltip, XAxis, YAxis } from "recharts";
 import { AXIS, TIP } from "@/components/consulting/charts";
 
 const KIND_C: Record<string, string> = { Compliance: "var(--s1)", Tax: "var(--s3)", Offset: "var(--s2)" };
@@ -18,8 +18,10 @@ export function Landscape({ points }: { points: { name: string; x: number; y: nu
             <YAxis type="number" dataKey="y" domain={[0, 90]} tick={AXIS} tickFormatter={(v) => `€${v}`} tickLine={false} axisLine={false} />
             <ReferenceLine y={82.32} stroke="var(--s2)" strokeDasharray="4 4" label={{ value: "CBAM Q3 2026 €82.32", position: "insideTopRight", fill: "var(--ink-2)", fontSize: 11 }} />
             <Tooltip {...TIP} content={({ payload }) => { const p = payload?.[0]?.payload; return p ? <div style={TIP.contentStyle} className="px-3 py-2"><p className="font-medium">{p.name}</p><p className="text-ink-2">{p.kind} · ~{p.x.toLocaleString("en-IN")} Mt · ~€{p.y}/t</p></div> : null; }} />
-            <Scatter data={data} isAnimationActive={false}>
-              {data.map((p) => <Cell key={p.name} fill={KIND_C[p.kind]} stroke="var(--surface)" strokeWidth={2} />)}
+            <Scatter data={data} isAnimationActive={false}
+              shape={(sp: { cx?: number; cy?: number; payload?: { name: string; kind: string } }) => (
+                <><title>{sp.payload?.name}</title><circle cx={sp.cx} cy={sp.cy} r={6} fill={KIND_C[sp.payload?.kind ?? "Compliance"]} stroke="var(--surface)" strokeWidth={2} /></>
+              )}>
               <LabelList dataKey="name" content={(lp) => { const { x, y, value } = lp as { x: number; y: number; value: string }; return <text x={Number(x) + 12} y={Number(y)} dy={4} fontSize={12} fill="var(--ink)">{value}</text>; }} />
             </Scatter>
           </ScatterChart>
@@ -72,7 +74,7 @@ export function CbamTimeline() {
           <div className="flex flex-wrap items-baseline gap-x-3">
             <span className="w-16 shrink-0 text-sm font-medium tabular-nums">{e.when}</span>
             <span className="text-sm text-ink-2 flex-1 min-w-[12rem]">{e.t}</span>
-            <span className={`text-[11px] rounded-md border px-1.5 ${e.law ? "border-s1 text-s1" : "border-s2 text-s2"}`}>{e.law ? "Law" : "Proposal"}</span>
+            <span className={`text-[11px] rounded-md border px-1.5 ${e.law ? "border-s1 text-s1i" : "border-s2 text-s2i"}`}>{e.law ? "Law" : "Proposal"}</span>
           </div>
         </li>
       ))}

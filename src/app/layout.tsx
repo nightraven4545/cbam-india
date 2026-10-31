@@ -17,8 +17,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en">
       <body className="antialiased min-h-screen">
+        <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50 focus:rounded-md focus:bg-ink focus:px-3 focus:py-2 focus:text-bg">Skip to content</a>
         <Nav />
-        <main className="mx-auto max-w-[1240px] px-4 py-8 sm:py-10">{children}</main>
+        <main id="main" className="mx-auto max-w-[1240px] px-4 py-8 sm:py-10">{children}</main>
         <footer className="mx-auto max-w-[1240px] px-4 py-8 text-xs text-ink-3 border-t border-line print:hidden">
           Prepared by Shreshtha, 31 Oct 2026. Producer inputs are graded A–E for confidence; grade D values are analyst estimates, not company disclosures. Not investment advice.
         </footer>

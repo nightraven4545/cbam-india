@@ -29,7 +29,7 @@ export default function Methodology() {
       </ul>
 
       <h2>Rule tables</h2>
-      <table>
+      <table tabIndex={0}>
         <thead><tr><th>Year</th>{YEARS.map((y) => <th key={y}>{y}</th>)}</tr></thead>
         <tbody>
           <tr><td>CBAM factor (law)</td>{YEARS.map((y) => <td key={y}>{pct(cbamFactor(y, "law"))}</td>)}</tr>
@@ -39,7 +39,7 @@ export default function Methodology() {
       </table>
 
       <h2>Confidence grades</h2>
-      <table>
+      <table tabIndex={0}>
         <tbody>
           <tr><td><strong>A</strong></td><td>CBAM-verified installation data (none public yet)</td></tr>
           <tr><td><strong>B</strong></td><td>Regulation or official statistic (benchmarks, factors, prices)</td></tr>
@@ -50,7 +50,7 @@ export default function Methodology() {
       </table>
 
       <h2>Producer inputs</h2>
-      <table>
+      <table tabIndex={0}>
         <thead><tr><th>Producer</th><th>Sector</th><th>Benchmark</th><th>Direct t/t</th><th>Indirect t/t</th><th>EU Mt</th><th>Output Mt</th><th>EBITDA €/t</th><th>Sources</th></tr></thead>
         <tbody>
           {PRODUCERS.map((p) => (
@@ -73,7 +73,7 @@ export default function Methodology() {
         Annual benefit = avoided certificates × price × pass-through × EU share of output (or 100% for a dedicated EU line) + CCTS credit price × (direct + indirect cut) + green premium × direct cut × EU share − OPEX delta.
         The avoided-certificate saving is capped at the certificates actually owed. MAC = (annualised capex + OPEX delta) ÷ tCO₂ cut, excluding carbon revenues.
       </p>
-      <table>
+      <table tabIndex={0}>
         <thead><tr><th>Lever</th><th>Sector</th><th>Direct cut</th><th>Scope 2 cut</th><th>Capex €/t</th><th>OPEX Δ €/t</th><th>Life</th><th>TRL</th></tr></thead>
         <tbody>{LEVERS.map((l) => <tr key={l.id}><td>{l.name}</td><td>{l.sector}</td><td>{l.abatement}</td><td>{l.scope2Cut}</td><td>{l.capex}</td><td>{l.opexDelta}</td><td>{l.life}</td><td>{l.trl}</td></tr>)}</tbody>
       </table>
@@ -91,13 +91,13 @@ export default function Methodology() {
 
       <h2>Delivered-cost crossover</h2>
       <p>Delivered cost = FOB + freight + max(0, E − F_t × B) × P for each origin, which is linear in P. An EU BF-BOF mill is modelled with the same free-allocation formula under the EU ETS. Crossover = the P at which two lines meet (unit-tested). FOB, freight and competitor intensities are illustrative grade-D 2026 levels.</p>
-      <table>
+      <table tabIndex={0}>
         <thead><tr><th>Origin</th><th>FOB €/t</th><th>Freight €/t</th><th>tCO₂/t</th><th>Benchmark</th><th>Note</th></tr></thead>
         <tbody>{COMPETITORS.map((c) => <tr key={c.origin}><td>{c.origin}</td><td>{c.fob}</td><td>{c.freight}</td><td>{c.intensity.toFixed(2)}</td><td>{c.benchmark}</td><td>{c.note}</td></tr>)}</tbody>
       </table>
 
       <h2>Country default values</h2>
-      <table>
+      <table tabIndex={0}>
         <thead><tr><th>Sector</th><th>Country</th><th>Default tCO₂/t</th><th>Source</th></tr></thead>
         <tbody>{(["steel", "aluminium"] as const).flatMap((k) => PEER_DEFAULTS[k].map((x) => <tr key={k + x.country}><td>{k}</td><td>{x.country}</td><td>{x.value}</td><td className="text-xs">{x.source}</td></tr>))}</tbody>
       </table>

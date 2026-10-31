@@ -225,7 +225,7 @@ export default function Dashboard() {
               </Card>
               <Card title="Producer leaderboard" sub={`Year ${s.year}, ${pct(s.passThrough)} pass-through. "Cum." covers 2026–2034 at this pass-through. Click a row to select it.`}>
                 <button onClick={exportLeaderboard} className="mb-3 rounded-md border border-line px-3 py-1 text-xs hover:bg-bg">Download CSV</button>
-                <div className="overflow-x-auto">
+                <div tabIndex={0} className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead className="text-left text-ink-3">
                       <tr>{["Producer", "Intensity t/t", "CBAM €/t default", "CBAM €/t verified", "EU EBITDA kept (verified)", "Verification €/yr", "Cum. verified", "Cum. default"].map((h) => <th key={h} className="py-2 pr-3 font-medium whitespace-nowrap">{h}</th>)}</tr>
@@ -295,7 +295,7 @@ export default function Dashboard() {
                   <div className="w-56"><Slider label="CCTS credit price (€/t)" value={cctsPrice} min={0} max={40} step={1} fmt={(v) => eur(v)} onChange={setCcts} /></div>
                   <div className="w-56"><Slider label="Green premium (€ per tCO₂ avoided)" value={greenPremium} min={0} max={150} step={5} fmt={(v) => eur(v)} onChange={setPremium} /></div>
                 </div>
-                <div className="overflow-x-auto">
+                <div tabIndex={0} className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead className="text-left text-ink-3">
                       <tr>{["Lever", "Direct cut t/t", "Capex €/t", "NPV €/t", "IRR", "Payback", "MAC €/tCO₂", "Steel CBAM?", "TRL"].map((h) => <th key={h} className="py-2 pr-3 font-medium whitespace-nowrap">{h}</th>)}</tr>
@@ -356,7 +356,7 @@ export default function Dashboard() {
                   ].map(([d, t, k]) => (
                     <li key={d} className="grid grid-cols-[150px_1fr] gap-3">
                       <span className="text-ink-3">{d}</span>
-                      <span>{t} <span className={`ml-1 text-[10px] uppercase rounded px-1 border ${k === "law" ? "border-s1 text-s1" : "border-s2 text-s2"}`}>{k}</span></span>
+                      <span>{t} <span className={`ml-1 text-[10px] uppercase rounded px-1 border ${k === "law" ? "border-s1 text-s1i" : "border-s2 text-s2i"}`}>{k}</span></span>
                     </li>
                   ))}
                 </ol>

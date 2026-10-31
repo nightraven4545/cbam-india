@@ -41,7 +41,7 @@ export function OptimiserCard({ p, s }: { p: Producer; s: Scenario }) {
       </div>
       <table className="w-full text-sm mt-3">
         <thead className="text-left text-ink-3"><tr><th className="py-1 pr-3 font-medium">Plant</th><th className="pr-3 font-medium">tCO₂/t</th><th className="pr-3 font-medium">CBAM €/t</th><th className="pr-3 font-medium">EU net premium €/t</th></tr></thead>
-        <tbody>{r.plants.map((x) => <tr key={x.name} className="border-t border-line"><td className="py-1 pr-3">{x.name}</td><td className="pr-3">{x.intensity}</td><td className="pr-3">{eur(x.cbam)}</td><td className={`pr-3 ${x.netPremium < 0 ? "text-s2" : ""}`}>{eur(x.netPremium)}</td></tr>)}</tbody>
+        <tbody>{r.plants.map((x) => <tr key={x.name} className="border-t border-line"><td className="py-1 pr-3">{x.name}</td><td className="pr-3">{x.intensity}</td><td className="pr-3">{eur(x.cbam)}</td><td className={`pr-3 ${x.netPremium < 0 ? "text-s2i" : ""}`}>{eur(x.netPremium)}</td></tr>)}</tbody>
       </table>
       <p className="text-sm mt-3">
         Re-allocating EU tonnes adds <strong>{m(uplift)}/yr</strong> of EBITDA against a capacity-weighted mix

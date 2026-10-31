@@ -47,15 +47,15 @@ export default function Summary() {
 
         <Panel className="p-5 sm:p-6 grid gap-6 sm:grid-cols-3">
           <div>
-            <p className="font-cond text-4xl font-semibold text-s2 leading-none"><Ticker value={f.defaultPerT} prefix="€" suffix="/t" /></p>
+            <p className="font-cond text-4xl font-semibold text-s2i leading-none"><Ticker value={f.defaultPerT} prefix="€" suffix="/t" /></p>
             <p className="text-sm text-ink-2 mt-2">2026 CBAM on a tonne of Indian hot-rolled coil, charged on EU default values</p>
           </div>
           <div>
-            <p className="font-cond text-4xl font-semibold text-s1 leading-none"><Ticker value={f.verifiedPerT} prefix="€" suffix="/t" /></p>
+            <p className="font-cond text-4xl font-semibold text-s1i leading-none"><Ticker value={f.verifiedPerT} prefix="€" suffix="/t" /></p>
             <p className="text-sm text-ink-2 mt-2">The same tonne from Tata Steel&apos;s BF-BOF with verified emissions data</p>
           </div>
           <div>
-            <p className="font-cond text-4xl font-semibold text-s3 leading-none"><Ticker value={f.verification / 1e6} prefix="€" suffix="m" /></p>
+            <p className="font-cond text-4xl font-semibold text-s3i leading-none"><Ticker value={f.verification / 1e6} prefix="€" suffix="m" /></p>
             <p className="text-sm text-ink-2 mt-2">Value of verified data per year to EU buyers of the five largest exporters</p>
           </div>
         </Panel>
@@ -77,7 +77,7 @@ export default function Summary() {
               <div>
                 <h3 className="font-semibold text-lg leading-snug">{r.title}</h3>
                 <p className="text-ink-2 mt-1 max-w-[70ch]">{r.body}</p>
-                <Link href={r.href} className="text-sm text-s1 underline underline-offset-2 mt-2 inline-block">See the evidence</Link>
+                <Link href={r.href} className="text-sm text-s1i underline underline-offset-2 mt-2 inline-block">See the evidence</Link>
               </div>
               <dl className="grid grid-cols-3 sm:grid-cols-1 gap-2 text-sm">
                 <div><dt className="text-ink-3 text-xs">Value</dt><dd className="font-medium">{r.value}</dd></div>

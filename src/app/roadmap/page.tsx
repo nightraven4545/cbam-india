@@ -41,15 +41,16 @@ export default function Roadmap() {
             <Prioritisation points={points} />
             <ol className="text-sm space-y-1.5 self-center">
               {ins.map((x) => (
-                <li key={x.id} className="flex gap-2"><span className="w-5 shrink-0 text-right font-medium" style={{ color: `var(--${TONE[x.owner]})` }}>{num.get(x.id)}</span><span className="text-ink-2">{x.name}</span></li>
+                <li key={x.id} className="flex gap-2"><span className="w-5 shrink-0 text-right font-medium" style={{ color: `var(--${TONE[x.owner]}i)` }}>{num.get(x.id)}</span><span className="text-ink-2">{x.name}</span></li>
               ))}
             </ol>
           </div>
         </Exhibit>
 
         <Exhibit n={3} title="The roadmap: start with data, contracts and routing now; build the policy case in parallel; hold hydrogen as an option for after 2030"
-          subtitle="Initiatives by owner and horizon, with the first 90 days of work">
-          <div className="overflow-x-auto">
+          subtitle="Initiatives by owner and horizon, with the first 90 days of work"
+          table={{ columns: ["#", "Initiative", "Owner", "Horizon", "First 90 days", "KPI"], rows: ins.map((x) => [num.get(x.id)!, x.name, x.owner, x.horizon, x.first90, x.kpi]) }}>
+          <div tabIndex={0} className="overflow-x-auto">
             <div className="min-w-[760px] grid grid-cols-[140px_repeat(3,1fr)] gap-px rounded-lg border border-line bg-line overflow-hidden text-sm">
               <div className="bg-sunken p-3" />
               {HORIZONS.map((h) => <div key={h} className="bg-sunken p-3 font-semibold">{h}</div>)}
@@ -75,7 +76,7 @@ export default function Roadmap() {
 
         <Exhibit n={4} title="Six KPIs tell the steering committee whether the response is on track"
           subtitle="Tracked quarterly; targets are proposals for discussion">
-          <div className="overflow-x-auto">
+          <div tabIndex={0} className="overflow-x-auto">
             <table className="dtable">
               <thead><tr><th>KPI</th><th>Why it matters</th><th>Baseline</th><th>2027 target</th><th>2030 target</th></tr></thead>
               <tbody>

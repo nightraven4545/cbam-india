@@ -54,7 +54,7 @@ export default function Markets() {
         <details className="group rounded-[10px] border border-line bg-surface px-5 py-1 open:pb-4">
           <summary className="cursor-pointer list-none py-3 font-cond text-lg font-semibold flex items-center justify-between gap-4">Carbon tax vs emissions trading<span className="text-ink-3 text-sm font-sans font-normal group-open:hidden">Expand</span><span className="text-ink-3 text-sm font-sans font-normal hidden group-open:inline">Collapse</span></summary>
           <div className="prose-cbam">
-      <table>
+      <table tabIndex={0}>
         <thead><tr><th /><th>Carbon tax</th><th>Emissions trading (cap-and-trade / baseline-and-credit)</th></tr></thead>
         <tbody>
           <tr><td>What is fixed</td><td>Price per tCO₂</td><td>Quantity (cap) or intensity (baseline); the price floats</td></tr>
@@ -107,7 +107,7 @@ export default function Markets() {
         <details className="group rounded-[10px] border border-line bg-surface px-5 py-1 open:pb-4">
           <summary className="cursor-pointer list-none py-3 font-cond text-lg font-semibold flex items-center justify-between gap-4">India vs EU at a glance<span className="text-ink-3 text-sm font-sans font-normal group-open:hidden">Expand</span><span className="text-ink-3 text-sm font-sans font-normal hidden group-open:inline">Collapse</span></summary>
           <div className="prose-cbam">
-      <table>
+      <table tabIndex={0}>
         <thead><tr><th /><th>EU ETS + CBAM</th><th>India CCTS</th></tr></thead>
         <tbody>
           <tr><td>Design</td><td>Absolute cap-and-trade</td><td>Intensity baseline-and-credit</td></tr>

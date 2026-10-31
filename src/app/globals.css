@@ -6,7 +6,7 @@
   --sunken: #e9edf1;
   --ink: #0e2238;
   --ink-2: #3f5163;
-  --ink-3: #6b7a89;
+  --ink-3: #5c6b7a;
   --line: #d9dee4;
   --s1: #2a78d6; /* verified / India-retained */
   --s2: #e8590c; /* carbon cost / default */
@@ -14,16 +14,19 @@
   --neutral: #8a96a3; /* baseline totals */
   --accent: #0e2238;
   --focus: #2a78d6;
+  --s1i: #1d62b5; --s2i: #b4410a; --s3i: #146c46;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #0d1520; --surface: #131e2b; --sunken: #0f1823; --ink: #e8edf2; --ink-2: #b4c0cc; --ink-3: #8595a6;
     --line: #253446; --s1: #3987e5; --s2: #d95926; --s3: #2a9d64; --neutral: #6c7b8b; --accent: #e8edf2; --focus: #3987e5;
+    --s1i: #6fa8ee; --s2i: #f08b57; --s3i: #4fc08c;
   }
 }
 :root[data-theme="dark"] {
   --bg: #0d1520; --surface: #131e2b; --sunken: #0f1823; --ink: #e8edf2; --ink-2: #b4c0cc; --ink-3: #8595a6;
   --line: #253446; --s1: #3987e5; --s2: #d95926; --s3: #2a9d64; --neutral: #6c7b8b; --accent: #e8edf2; --focus: #3987e5;
+    --s1i: #6fa8ee; --s2i: #f08b57; --s3i: #4fc08c;
 }
 
 @theme inline {
@@ -38,6 +41,9 @@
   --color-s2: var(--s2);
   --color-s3: var(--s3);
   --color-neutral: var(--neutral);
+  --color-s1i: var(--s1i);
+  --color-s2i: var(--s2i);
+  --color-s3i: var(--s3i);
   --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
   --font-cond: "IBM Plex Sans Condensed", "IBM Plex Sans", ui-sans-serif, sans-serif;
   --radius-sm: 6px;

@@ -52,7 +52,7 @@ export default function Deck() {
 
       <Slide n={1} section="Situation" title={`CBAM will cost India's five largest steel exporters ${bn(f.vas.doNothing)} by 2034 if they do nothing; ${share}% of it is a tax on missing data`}>
         <div className="grid gap-6 sm:grid-cols-3">
-          {[[eur(f.defaultPerT) + "/t", "2026 CBAM on Indian hot-rolled coil on EU default values", "text-s2"], [eur(f.verifiedPerT) + "/t", "The same tonne, verified, from India's most efficient BF-BOF", "text-s1"], [m(f.verification) + "/yr", "What verified data is worth to EU buyers of the five largest exporters", "text-s3"]].map(([v, k, c]) => (
+          {[[eur(f.defaultPerT) + "/t", "2026 CBAM on Indian hot-rolled coil on EU default values", "text-s2i"], [eur(f.verifiedPerT) + "/t", "The same tonne, verified, from India's most efficient BF-BOF", "text-s1i"], [m(f.verification) + "/yr", "What verified data is worth to EU buyers of the five largest exporters", "text-s3i"]].map(([v, k, c]) => (
             <div key={k} className="border-t-2 border-ink pt-3"><p className={`font-cond text-4xl font-semibold ${c}`}>{v}</p><p className="text-sm text-ink-2 mt-2">{k}</p></div>
           ))}
         </div>

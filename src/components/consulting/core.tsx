@@ -58,7 +58,7 @@ export function Panel({ children, className = "" }: { children: React.ReactNode;
 }
 
 export function Stat({ value, label, tone }: { value: React.ReactNode; label: string; tone?: "cost" | "good" | "verified" }) {
-  const c = tone === "cost" ? "text-s2" : tone === "good" ? "text-s3" : tone === "verified" ? "text-s1" : "text-ink";
+  const c = tone === "cost" ? "text-s2i" : tone === "good" ? "text-s3i" : tone === "verified" ? "text-s1i" : "text-ink";
   return (
     <div>
       <p className={`font-cond text-3xl sm:text-4xl font-semibold leading-none ${c}`}>{value}</p>

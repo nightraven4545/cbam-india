@@ -27,7 +27,7 @@ export function Exhibit({ n, title, subtitle, source, table, children, controls 
       {controls && <div className="mt-4">{controls}</div>}
       <div className="mt-4">
         {asTable && table ? (
-          <div className="overflow-x-auto">
+          <div tabIndex={0} className="overflow-x-auto">
             <table className="dtable">
               <thead><tr>{table.columns.map((c) => <th key={c}>{c}</th>)}</tr></thead>
               <tbody>{table.rows.map((r, i) => <tr key={i}>{r.map((x, j) => <td key={j} className={typeof x === "number" ? "num" : ""}>{typeof x === "number" ? x.toLocaleString("en-IN", { maximumFractionDigits: 2 }) : x}</td>)}</tr>)}</tbody>

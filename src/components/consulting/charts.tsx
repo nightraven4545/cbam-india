@@ -26,7 +26,7 @@ export function Waterfall({ steps, height = 320, fmt = fmtM }: { steps: WStep[];
   });
   const color = (k: string) => (k === "total" ? "var(--neutral)" : k === "down" ? "var(--s3)" : "var(--s2)");
   return (
-    <div className="overflow-x-auto">
+    <div tabIndex={0} className="overflow-x-auto">
     <div style={{ height }} className="min-w-[640px]">
       <ResponsiveContainer>
         <BarChart data={data} margin={{ top: 24, left: 4, right: 8, bottom: 4 }}>
@@ -78,8 +78,11 @@ export function Matrix2x2({ points, xLabel, yLabel, xMid, yMid, quadrants, xFmt 
               const p = payload?.[0]?.payload as MPoint | undefined;
               return p ? <div style={TIP.contentStyle} className="px-3 py-2"><p className="font-medium">{p.name}</p><p className="text-ink-2">{xLabel}: {xFmt(p.x)}</p><p className="text-ink-2">{yLabel}: {yFmt(p.y)}</p></div> : null;
             }} />
-          <Scatter data={points} isAnimationActive={false}>
-            {points.map((p) => <Cell key={p.name} fill={`var(--${p.tone ?? "s1"})`} fillOpacity={0.85} stroke="var(--surface)" strokeWidth={2} />)}
+          <Scatter data={points} isAnimationActive={false}
+            shape={(sp: { cx?: number; cy?: number; size?: number; payload?: MPoint }) => (
+              <><title>{sp.payload?.name}</title>
+                <circle cx={sp.cx} cy={sp.cy} r={Math.sqrt((sp.size ?? 64) / Math.PI)} fill={`var(--${sp.payload?.tone ?? "s1"})`} fillOpacity={0.85} stroke="var(--surface)" strokeWidth={2} /></>
+            )}>
             <LabelList dataKey={labelKey} content={(lp) => {
               const { x, y, value } = lp as { x: number; y: number; value: string };
               return <text x={Number(x) + 14} y={Number(y)} dy={4} fontSize={12} fontWeight={500} fill="var(--ink)">{value}</text>;
@@ -110,13 +113,15 @@ export function SankeyChart({ nodes, links, height = 380, fmt = (v: number) => v
     );
   };
   return (
-    <div style={{ height }}>
+    <div tabIndex={0} className="overflow-x-auto">
+    <div style={{ height }} className="min-w-[680px]">
       <ResponsiveContainer>
         <Sankey data={{ nodes, links }} nodePadding={18} nodeWidth={12} margin={{ left: 150, right: 190, top: 8, bottom: 8 }}
           link={{ stroke: "var(--s1)", strokeOpacity: 0.22 }} node={NodeShape as never} iterations={64}>
           <Tooltip {...TIP} formatter={(v: number) => fmt(v)} />
         </Sankey>
       </ResponsiveContainer>
+    </div>
     </div>
   );
 }
@@ -150,7 +155,7 @@ export function TreemapChart({ items, height = 360, fmt = (v: number) => String(
 export interface GRow { stream: string; task: string; start: number; end: number; milestone?: string }
 export function Gantt({ rows, weeks }: { rows: GRow[]; weeks: number }) {
   return (
-    <div className="overflow-x-auto">
+    <div tabIndex={0} className="overflow-x-auto">
       <div className="min-w-[640px]">
         <div className="grid text-xs text-ink-3 border-b border-line pb-1" style={{ gridTemplateColumns: `220px repeat(${weeks}, 1fr)` }}>
           <span>Workstream · activity</span>
@@ -184,7 +189,7 @@ export function Gantt({ rows, weeks }: { rows: GRow[]; weeks: number }) {
 // Issue tree: key question → branches → sub-questions → analyses, collapsible.
 export interface INode { id: string; q: string; status?: "answered" | "partly" | "open"; finding?: string; href?: string; children?: INode[] }
 const STATUS: Record<string, string> = { answered: "Answered", partly: "Partly answered", open: "Open" };
-const STATUS_C: Record<string, string> = { answered: "border-s3 text-s3", partly: "border-s2 text-s2", open: "border-line text-ink-3" };
+const STATUS_C: Record<string, string> = { answered: "border-s3 text-s3i", partly: "border-s2 text-s2i", open: "border-line text-ink-3" };
 export function IssueTree({ root }: { root: INode }) {
   const [open, setOpen] = useState<Record<string, boolean>>(() => Object.fromEntries((root.children ?? []).map((c) => [c.id, true])));
   const node = (n: INode, depth: number) => {
@@ -200,7 +205,7 @@ export function IssueTree({ root }: { root: INode }) {
           <div className="min-w-0 flex-1">
             <p className={depth === 1 ? "font-semibold" : "text-sm"}>{n.q}</p>
             {n.finding && <p className="text-sm text-ink-2 mt-1">{n.finding}</p>}
-            {n.href && <a href={n.href} className="text-xs text-s1 underline underline-offset-2 mt-1 inline-block">See the analysis</a>}
+            {n.href && <a href={n.href} className="text-xs text-s1i underline underline-offset-2 mt-1 inline-block">See the analysis</a>}
           </div>
           {n.status && <span className={`shrink-0 text-[11px] rounded-md border px-1.5 py-0.5 ${STATUS_C[n.status]}`}>{STATUS[n.status]}</span>}
         </div>

@@ -96,14 +96,14 @@ function Radar() {
       <p className="text-sm font-medium mb-1">EU imports from India 2024 by heading, US$ million: blue = already in CBAM, orange = proposed for 2028</p>
       <TreemapChart height={340} fmt={(v) => `$${Math.round(v).toLocaleString("en-IN")}m`}
         items={[...DOWNSTREAM].sort((a, b) => b.usdM - a.usdM).map((d) => ({ name: `${d.hs} ${d.product.split(" (")[0].split(",")[0]}`, size: d.usdM, color: d.status === "inScope" ? "#2a78d6" : "#e8590c", sub: d.status === "inScope" ? "in scope" : "2028" }))} />
-      <div className="overflow-x-auto mt-5">
+      <div tabIndex={0} className="overflow-x-auto mt-5">
         <table className="w-full text-sm">
           <thead className="text-left text-ink-3"><tr>{["HS", "Product", "EU imports 2024", "kt", "Status", "MSME cluster", "CBAM/yr verified", "CBAM/yr on defaults", "% of value (defaults)"].map((h) => <th key={h} className="py-2 pr-3 font-medium whitespace-nowrap">{h}</th>)}</tr></thead>
           <tbody>
             {rows.map((r) => (
               <tr key={r.hs} className="border-t border-line">
                 <td className="py-2 pr-3">{r.hs}</td><td className="pr-3">{r.product}</td><td className="pr-3">{usd(r.usdM)}</td><td className="pr-3">{r.kt.toFixed(1)}</td>
-                <td className="pr-3 whitespace-nowrap"><span className={`text-[10px] uppercase rounded px-1 border ${r.status === "inScope" ? "border-s1 text-s1" : "border-s2 text-s2"}`}>{r.status === "inScope" ? "in scope now" : "proposed 2028"}</span></td>
+                <td className="pr-3 whitespace-nowrap"><span className={`text-[10px] uppercase rounded px-1 border ${r.status === "inScope" ? "border-s1 text-s1i" : "border-s2 text-s2i"}`}>{r.status === "inScope" ? "in scope now" : "proposed 2028"}</span></td>
                 <td className="pr-3 text-ink-2">{r.cluster}</td><td className="pr-3">{r.live ? m(r.v) : "–"}</td><td className="pr-3">{r.live ? m(r.df) : "–"}</td><td className="pr-3">{r.live ? pct(r.pctValue) : "–"}</td>
               </tr>
             ))}

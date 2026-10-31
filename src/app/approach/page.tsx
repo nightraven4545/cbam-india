@@ -7,7 +7,7 @@ import { WORKPLAN, hypotheses, issueTree } from "@/lib/storyline";
 
 export const metadata: Metadata = { title: "Approach", description: "Issue tree, hypotheses, workplan and data confidence behind the CBAM India analysis." };
 
-const VERDICT: Record<string, string> = { confirmed: "border-s3 text-s3", rejected: "border-s2 text-s2", refined: "border-s1 text-s1" };
+const VERDICT: Record<string, string> = { confirmed: "border-s3 text-s3i", rejected: "border-s2 text-s2i", refined: "border-s1 text-s1i" };
 
 export default function Approach() {
   const hs = hypotheses();
@@ -56,23 +56,23 @@ export default function Approach() {
         </Exhibit>
 
         <Exhibit n={3} title="A six-week plan: diagnose, deep-dive, design solutions, then a roadmap for the steering committee"
-          subtitle="Workstreams, activities and milestones (diamonds)">
+          subtitle="Workstreams, activities and milestones (diamonds)"
+          table={{ columns: ["Workstream", "Activity", "Start week", "End week", "Milestone"], rows: WORKPLAN.map((r) => [r.stream, r.task, r.start, r.end, r.milestone ?? ""]) }}>
           <Plan rows={WORKPLAN} />
         </Exhibit>
 
         <Exhibit n={4} title="Most producer-level inputs are still estimates; the regulation side of the model is solid"
           subtitle={`Every input in the model by confidence grade (${total} inputs) and what would upgrade it`}
           table={{ columns: ["Grade", "What it is", "Inputs", "How to upgrade"], rows: Object.entries(grades).map(([g, n]) => [g, GRADE_TXT[g][0], n, GRADE_TXT[g][1]]) }}>
-          <div className="flex h-8 w-full overflow-hidden rounded-md border border-line" role="img" aria-label="Inputs by confidence grade">
+          <div className="flex h-6 w-full overflow-hidden rounded-md border border-line" role="img" aria-label={`Inputs by confidence grade: ${Object.entries(grades).map(([g, n]) => `${g} ${n}`).join(", ")}`}>
             {Object.entries(grades).filter(([, n]) => n > 0).map(([g, n]) => (
-              <span key={g} className="h-full flex items-center justify-center text-xs text-white font-medium border-r-2 border-surface last:border-r-0"
-                style={{ width: `${(n / total) * 100}%`, background: GRADE_C[g] }}>{g} · {n}</span>
+              <span key={g} className="h-full border-r-2 border-surface last:border-r-0" style={{ width: `${(n / total) * 100}%`, background: GRADE_C[g] }} />
             ))}
           </div>
           <dl className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-5 text-sm">
             {Object.entries(GRADE_TXT).map(([g, [what, how]]) => (
               <div key={g} className="border-t-2 pt-2" style={{ borderColor: GRADE_C[g] }}>
-                <dt className="font-medium">{g}: {what}</dt>
+                <dt className="font-medium">{g}: {what} <span className="text-ink-3 font-normal">({grades[g]} inputs)</span></dt>
                 <dd className="text-ink-2 mt-1">{how}</dd>
               </div>
             ))}

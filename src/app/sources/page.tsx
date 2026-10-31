@@ -21,10 +21,10 @@ export default function Sources() {
               <tbody>
                 {SOURCES.filter((s) => s.grade === g).map((s) => (
                   <tr key={s.id}>
-                    <td className="pl-4"><a href={s.url} className="text-s1 underline underline-offset-2" target="_blank" rel="noreferrer">{s.title}</a></td>
+                    <td className="pl-4"><a href={s.url} className="text-s1i underline underline-offset-2" target="_blank" rel="noreferrer">{s.title}</a></td>
                     <td className="text-ink-2">{s.publisher}</td>
                     <td className="text-ink-2">{s.usedFor}</td>
-                    <td>{s.status ? <span className={`text-[11px] rounded-md border px-1.5 ${s.status === "law" ? "border-s1 text-s1" : "border-s2 text-s2"}`}>{s.status === "law" ? "Law" : "Proposal"}</span> : "–"}</td>
+                    <td>{s.status ? <span className={`text-[11px] rounded-md border px-1.5 ${s.status === "law" ? "border-s1 text-s1i" : "border-s2 text-s2i"}`}>{s.status === "law" ? "Law" : "Proposal"}</span> : "–"}</td>
                     <td className="text-ink-3 whitespace-nowrap">{s.accessed}</td>
                   </tr>
                 ))}
