@@ -1,10 +1,26 @@
 import type { Metadata } from "next";
 import { PageHeader } from "@/components/consulting/core";
 import { Exhibit } from "@/components/consulting/Exhibit";
-import { EtsHistory, Landscape, CbamTimeline } from "@/components/pages/MarketsCharts";
+import { EtsHistory, CbamTimeline } from "@/components/pages/MarketsCharts";
+import { Takeaway, Toc } from "@/components/consulting/ApproachParts";
+import { CarbonStack, CostFlow, EsgScorecard, FrameworksMatrix, GreenwashGrid, PriceLadder } from "@/components/esg/EsgParts";
+import PathwayChart from "@/components/esg/PathwayChart";
+import { ESG, FRAMEWORKS, GW_TESTS, PRICE_LADDER, REQUIREMENTS, TAXONOMY, borderGap, greenwashTests, historicRate, pathway, requiredRate, reuse } from "@/lib/esg";
+import { PRODUCERS } from "@/lib/data";
+import { DEFAULT_SCENARIO, producerCost } from "@/lib/model";
+import { priceIn } from "@/lib/cbam";
+
+const eur = (n: number) => `€${Math.round(n).toLocaleString("en-IN")}`;
+const pctAbs = (r: number) => `${Math.abs(r * 100).toFixed(1)}%`;
+const COLORS = ["var(--s1)", "var(--s2)", "var(--s3)"];
+const TOC = [
+  { id: "prices", label: "Carbon prices" }, { id: "flow", label: "Cost flow" }, { id: "frameworks", label: "Frameworks" },
+  { id: "scorecard", label: "ESG scorecard" }, { id: "pathway", label: "Net-zero paths" }, { id: "greenwashing", label: "Greenwashing" },
+  { id: "india", label: "India's stack" }, { id: "history", label: "EU price & timeline" }, { id: "primer", label: "Primer" },
+];
 import { ETS_PRICES } from "@/lib/roadmap";
 
-export const metadata: Metadata = { title: "Carbon markets", description: "Carbon taxes, EU ETS, India's PAT/ESCerts and CCTS, voluntary markets, CORSIA, futures, net-zero maths and greenwashing." };
+export const metadata: Metadata = { title: "ESG & carbon markets", description: "Carbon taxes, EU ETS, India's PAT/ESCerts and CCTS, voluntary markets, CORSIA, futures, net-zero maths and greenwashing." };
 
 // Worked firm-level net-zero example (illustrative integrated steelmaker, not a real company).
 const base = { output: 20, s1: 2.1, s2: 0.25, s3: 0.45 }; // Mt crude steel; tCO2e/t
@@ -12,44 +28,117 @@ const baseYear = 2025, target = 2050;
 const abs = (base.s1 + base.s2 + base.s3) * base.output;
 const linear = abs / (target - baseYear);
 
-// Approximate 2026 scale and price of major carbon-pricing schemes (ICAP Status Report, World Bank State & Trends; grade D).
-const SCHEMES = [
-  { name: "EU ETS", x: 1300, y: 80, kind: "Compliance" },
-  { name: "UK ETS", x: 100, y: 50, kind: "Compliance" },
-  { name: "China ETS", x: 8000, y: 10, kind: "Compliance" },
-  { name: "Korea ETS", x: 600, y: 6, kind: "Compliance" },
-  { name: "Singapore tax", x: 40, y: 31, kind: "Tax" },
-  { name: "CORSIA units", x: 150, y: 20, kind: "Offset" },
-  { name: "Voluntary market", x: 200, y: 5, kind: "Offset" },
-  { name: "India CCTS (pre-trading)", x: 700, y: 1, kind: "Compliance" },
-];
-
-export default function Markets() {
+export default function Esg() {
+  const ladder = PRICE_LADDER;
+  const disclosed = ESG.filter((p) => p.intensity !== null);
+  const rates = disclosed.map((p) => requiredRate(p)).filter((r): r is number => r !== null);
+  const rising = ESG.filter((p) => (historicRate(p) ?? 0) > 0);
+  const gw = ESG.map((p) => Object.values(greenwashTests(p)));
+  const passAll = gw.filter((r) => r.every((x) => x === "green")).length, passNone = gw.filter((r) => r.every((x) => x !== "green")).length;
+  const steeper = disclosed.filter((p) => historicRate(p) !== null && requiredRate(p)! < historicRate(p)!);
+  const instFw = FRAMEWORKS.filter((f) => f.marks[4] === "yes" && f.marks[3] === "yes").map((f) => f.name);
+  const listAnd = (a: string[]) => (a.length <= 1 ? a.join("") : `${a.slice(0, -1).join(", ")} and ${a[a.length - 1]}`);
+  const tata = PRODUCERS.find((p) => p.id === "tata")!;
+  const s30 = { ...DEFAULT_SCENARIO, year: 2030 };
+  const act = producerCost(tata, s30, "actual");
+  const credit = producerCost(tata, { ...s30, originCarbonPrice: 20 }, "actual");
+  const price2030 = priceIn(2030, DEFAULT_SCENARIO.basePrice, DEFAULT_SCENARIO.growth);
+  const flowHit = act.net * DEFAULT_SCENARIO.passThrough;
+  const flowShare = flowHit / tata.ebitdaEUR.value;
+  const flow = [
+    { label: "EU carbon price (2030 path)", value: `${eur(price2030)}/t`, sub: "€82.32 in Q3 2026, +3% a year" },
+    { label: "Certificates per tonne", value: `${act.certificates.toFixed(2)} t`, sub: `${act.applied.toFixed(2)} t verified − ${act.freeAllocation.toFixed(2)} t free allocation` },
+    { label: "EU importer's CBAM bill", value: `${eur(act.net)}/t`, sub: "certificates × price, paid by the importer" },
+    { label: "Passed back in the price", value: `${eur(flowHit)}/t`, sub: `${Math.round(DEFAULT_SCENARIO.passThrough * 100)}% pass-through in contract terms` },
+    { label: "Share of EBITDA per EU tonne", value: `${Math.round(flowShare * 100)}%`, sub: `of ${eur(tata.ebitdaEUR.value)}/t FY26 EBITDA` },
+  ];
   return (
     <div>
-      <PageHeader title="The EU carbon price is ten times what most of Asia pays, and CBAM now carries it to India's factory gate"
-        lede="A primer on the instruments behind the analysis: how carbon is priced, where India's own markets stand, and what firms should and should not claim." />
-      <div className="grid gap-6">
-        <Exhibit n={1} title="Europe prices carbon at about €80/t; China, Korea and the voluntary market sit below €10, and India's CCTS has no price yet"
-          subtitle="Major carbon-pricing schemes: emissions covered (log scale, MtCO₂) against 2026 price (€/tCO₂)"
-          source="ICAP Emissions Trading Worldwide Status Report; World Bank State and Trends of Carbon Pricing; approximate values (grade D). CCTS trading expected from late 2026, so its price is shown at ~0."
-          table={{ columns: ["Scheme", "Covered MtCO₂", "Price €/t", "Type"], rows: SCHEMES.map((x) => [x.name, x.x, x.y, x.kind]) }}>
-          <Landscape points={SCHEMES} />
-        </Exhibit>
-        <div className="grid gap-6 lg:grid-cols-2">
-          <Exhibit n={2} title="The EU price has held €65–85/t since 2022; that is the price CBAM certificates follow"
-            subtitle="EU allowance (EUA) annual average price, €/tCO₂"
-            source="ICE front-December annual averages (LSEG Carbon Research for 2025); 2026 = average of the Commission's Q1–Q3 CBAM certificate prices."
-            table={{ columns: ["Year", "€/t"], rows: ETS_PRICES.map((x) => [x.year, x.price]) }}>
-            <EtsHistory data={ETS_PRICES} />
-          </Exhibit>
-          <Exhibit n={3} title="Law in force runs to 2034; the open proposals would widen scope and slow the phase-out"
-            subtitle="CBAM milestones, law vs proposal">
-            <CbamTimeline />
-          </Exhibit>
+      <PageHeader title={`None of the ${disclosed.length} producers that disclose an intensity qualifies as green steel under India's own taxonomy, and CBAM will price that gap at the border`}
+        lede="An ESG view of the same problem: what carbon costs where, how that cost reaches an Indian plant, which disclosures buyers and regulators require, how credible each producer's targets are, and where greenwashing risk sits." />
+      <div className="xl:grid xl:grid-cols-[1fr_200px] xl:gap-10">
+        <div className="grid gap-6 min-w-0">
+          <section id="prices" className="grid gap-4 scroll-mt-20">
+            <Takeaway>CBAM charges the EU price on every chargeable tonne. A Chinese or Korean exporter can deduct a ~€6–9 home price under Article 9; an Indian one can deduct nothing until CCTS credits trade at a price the EU recognises.</Takeaway>
+            <Exhibit n={1} title={`Europe prices carbon at about ${eur(ladder[0].eur!)}/t; Asian systems sit below €10, and India's CCTS has no price yet`}
+              subtitle="Carbon price per tCO₂, latest available, € (USD prices converted at $1.16/€); right column = what CBAM still collects per chargeable tonne after crediting the home price"
+              source={<>{ladder.map((p) => `${p.name}: ${p.source} (grade ${p.grade})`).join("; ")}.</>}
+              table={{ columns: ["Scheme", "Native price", "€/t", "Gap to CBAM €/t"], rows: ladder.map((p) => [p.name, p.native, p.eur === null ? "n/a" : +p.eur.toFixed(2), +borderGap(p).toFixed(2)]) }}>
+              <PriceLadder items={ladder} />
+            </Exhibit>
+          </section>
+
+          <section id="flow" className="grid gap-4 scroll-mt-20">
+            <Takeaway>{`At the base 50% pass-through, CBAM takes ${Math.round(flowShare * 100)}% of ${tata.name}'s EBITDA on each EU tonne in 2030, and an explicit €20/t Indian price would cut the EU bill by ${eur(credit.originCredit)}/t.`}</Takeaway>
+            <Exhibit n={2} title={`How a carbon price reaches an Indian plant: ${eur(price2030)}/t in Europe becomes ${eur(flowHit)}/t off the margin of a verified ${tata.name} tonne in 2030`}
+              subtitle="One tonne of hot-rolled coil, verified data, 2030, base scenario. Article 9 shown as a side branch at an explicit €20/t Indian price"
+              source="Model: certificate price €82.32 growing 3%/yr; CBAM factor 51.5% (2030); route benchmark; 50% pass-through; EBITDA FY26 (grade C).">
+              <CostFlow steps={flow} credit={{ value: `−${eur(credit.originCredit)}/t`, sub: `on the importer's bill if India's €20/t price on ${credit.certificates.toFixed(2)} chargeable tonnes is recognised` }} />
+            </Exhibit>
+          </section>
+
+          <section id="frameworks" className="grid gap-4 scroll-mt-20">
+            <Takeaway>{`Build installation-level, product-level emissions data once: it feeds ${reuse(4)} of the ${FRAMEWORKS.length} frameworks here, including CBAM, the Green Steel Taxonomy and ResponsibleSteel. Corporate BRSR numbers do not.`}</Takeaway>
+            <Exhibit n={3} title={`Every framework asks for Scope 1 and 2, but only ${listAnd(instFw)} need installation-level product footprints`}
+              subtitle="What each disclosure or target framework requires of a steel producer"
+              source="Analyst mapping of the GHG Protocol Corporate Standard, SEBI BRSR Core, IFRS S2, ESRS E1, Regulation (EU) 2023/956, India Green Steel Taxonomy (Dec 2024), SBTi steel guidance and the ResponsibleSteel Standard (grade C)."
+              table={{ columns: ["Framework", ...REQUIREMENTS], rows: FRAMEWORKS.map((f) => [f.name, ...f.marks.map((m) => (m === "yes" ? "Required" : m === "part" ? "Partial" : "–"))]) }}>
+              <FrameworksMatrix />
+            </Exhibit>
+          </section>
+
+          <section id="scorecard" className="grid gap-4 scroll-mt-20">
+            <Takeaway>{`Disclosed intensities run ${Math.min(...disclosed.map((p) => p.intensity!)).toFixed(2)}–${Math.max(...disclosed.map((p) => p.intensity!)).toFixed(2)} t, above the ${TAXONOMY.green} t green line. Hitting the 2030 targets needs cuts of ${pctAbs(Math.max(...rates))}–${pctAbs(Math.min(...rates))} a year.`}</Takeaway>
+            <Exhibit n={4} title={`${disclosed.length} of ${ESG.length} producers disclose an intensity in our sources; none earns a Green Steel Taxonomy star, and ${rising.length ? `${rising.map((p) => p.name).join(", ")} is moving the wrong way` : "all are moving toward their targets"}`}
+              subtitle="Producer climate disclosures: latest Scope 1+2 intensity, taxonomy rating, 2030 target and the annual cut it implies, recent trend, net-zero year, renewable share"
+              source={<>{ESG.map((p) => `${p.name}: ${p.source}`).join("; ")}. Taxonomy rating uses corporate Scope 1+2 per tonne of crude steel as a proxy for the finished-steel boundary. &quot;Not disclosed&quot; means not found in these sources.</>}
+              table={{ columns: ["Producer", "Intensity", "Year", "2030 target", "Cut needed/yr", "Trend/yr", "Net zero", "Grade"], rows: ESG.map((p) => [p.name, p.intensity ?? "n/d", p.intensityYear ?? "n/d", p.target2030 ?? "n/d", requiredRate(p) === null ? "n/d" : pctAbs(requiredRate(p)!), historicRate(p) === null ? "n/d" : (historicRate(p)! * 100).toFixed(1) + "%", p.netZero ?? "n/d", p.grade]) }}>
+              <EsgScorecard rows={ESG} />
+            </Exhibit>
+          </section>
+
+          <section id="pathway" className="grid gap-4 scroll-mt-20">
+            <Exhibit n={5} title={`For ${steeper.length} of ${disclosed.length} disclosing producers the 2030 path is steeper than their own track record; 2026–30 is where credibility will be tested`}
+              subtitle="Scope 1+2 intensity, tCO₂ per tonne of crude steel: reported (solid) and the straight line to each 2030 target and net-zero year (dashed)"
+              source="Company disclosures as in Exhibit 4; JSW's 2005 base is derived from its stated −42% target. Straight lines are an analytical device, not company guidance.">
+              <PathwayChart green={TAXONOMY.green} series={disclosed.map((p, i) => ({ id: p.id, name: p.name, color: COLORS[i], points: pathway(p) }))} />
+            </Exhibit>
+          </section>
+
+          <section id="greenwashing" className="grid gap-4 scroll-mt-20">
+            <Takeaway>Greenwashing risk for steel is less about slogans than about numbers: intensity-only targets, trends that contradict targets, and quoting corporate BRSR figures where buyers need CBAM-boundary values.</Takeaway>
+            <Exhibit n={6} title={`${passAll === 0 ? "No producer passes every test" : `${passAll} producer(s) pass every test`}${passNone ? `, and ${passNone} pass none` : ""}: the common gaps are intensity-only targets and undisclosed renewable shares`}
+              subtitle="Greenwashing-risk tests applied to each producer's disclosures, with three enforcement cases that set the standard"
+              source={<>Tests follow the CCPA Guidelines for Prevention and Regulation of Greenwashing (India, 2024) and Directive (EU) 2024/825 on empowering consumers for the green transition: {GW_TESTS.map((t) => `${t.label} (${t.basis})`).join("; ")}.</>}
+              table={{ columns: ["Producer", ...GW_TESTS.map((t) => t.label)], rows: ESG.map((p) => [p.name, ...GW_TESTS.map((t) => greenwashTests(p)[t.id])]) }}>
+              <GreenwashGrid rows={ESG} />
+            </Exhibit>
+          </section>
+
+          <section id="india" className="grid gap-4 scroll-mt-20">
+            <Exhibit n={7} title="India's carbon stack is built bottom-up from energy efficiency; the layer that matters for CBAM, an Article 9 link, does not exist yet"
+              subtitle="India's carbon-pricing instruments, from the oldest layer to the open CBAM question"
+              source="BEE PAT scheme; Carbon Credit Trading Scheme 2023 and its amendments; GHG-intensity target notifications for FY2025-26 and FY2026-27; Regulation (EU) 2023/956 Art. 9 (grade C).">
+              <CarbonStack />
+            </Exhibit>
+          </section>
+
+          <div id="history" className="grid gap-6 lg:grid-cols-2 scroll-mt-20">
+            <Exhibit n={8} title="The EU price has held €65–85/t since 2022; that is the price CBAM certificates follow"
+              subtitle="EU allowance (EUA) annual average price, €/tCO₂"
+              source="ICE front-December annual averages (LSEG Carbon Research for 2025); 2026 = average of the Commission's Q1–Q3 CBAM certificate prices."
+              table={{ columns: ["Year", "€/t"], rows: ETS_PRICES.map((x) => [x.year, x.price]) }}>
+              <EtsHistory data={ETS_PRICES} />
+            </Exhibit>
+            <Exhibit n={9} title="Law in force runs to 2034; the open proposals would widen scope and slow the phase-out"
+              subtitle="CBAM milestones, law vs proposal">
+              <CbamTimeline />
+            </Exhibit>
+          </div>
         </div>
+        <Toc items={TOC} />
       </div>
-      <h2 className="font-cond text-[1.7rem] font-semibold mt-14 mb-4">Primer: instruments, India&apos;s stack, net zero and greenwashing</h2>
+      <h2 id="primer" className="font-cond text-[1.7rem] font-semibold mt-14 mb-4 scroll-mt-20">Primer: instruments, India&apos;s stack, net zero and greenwashing</h2>
       <div className="grid gap-3">
         <details className="group rounded-[10px] border border-line bg-surface px-5 py-1 open:pb-4">
           <summary className="cursor-pointer list-none py-3 font-cond text-lg font-semibold flex items-center justify-between gap-4">Carbon tax vs emissions trading<span className="text-ink-3 text-sm font-sans font-normal group-open:hidden">Expand</span><span className="text-ink-3 text-sm font-sans font-normal hidden group-open:inline">Collapse</span></summary>

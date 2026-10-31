@@ -10,7 +10,7 @@ const NAV = [
   { href: "/model", label: "Model" },
   { href: "/roadmap", label: "Roadmap" },
   { href: "/policy", label: "Policy & MSMEs" },
-  { href: "/markets", label: "Carbon markets" },
+  { href: "/esg", label: "ESG & carbon" },
   { href: "/deck", label: "Deck" },
   { href: "/methodology", label: "Methodology" },
   { href: "/sources", label: "Sources" },

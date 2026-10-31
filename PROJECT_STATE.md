@@ -41,10 +41,20 @@ Last updated: 31 Oct 2026.
     - value-driver tree, true MACC and Harvey lever assessment (/model);
     - Harvey assessment (/roadmap).
   - 38 tests.
-  - D, ESG & carbon markets module (/esg): next.
+  - D, ESG & carbon markets module: done. /esg replaces /markets, which redirects permanently via next.config. Data and logic live in `src/lib/esg.ts`, tested.
+    - Exhibits:
+      - carbon-price ladder with the border gap;
+      - live cost flow with an Article 9 side branch;
+      - disclosure-frameworks matrix (8 frameworks × 8 requirements);
+      - producer ESG scorecard (Green Steel Taxonomy stars, required vs historic rate);
+      - net-zero pathway chart;
+      - greenwashing RAG tests plus case cards;
+      - India carbon stack.
+    - The old primer stays collapsed below. All titles are computed. 44 tests.
 
 ## Next
-- v4 D: ESG module; then a ₹/€ toggle and takeaways/contents panels on the other long pages.
+- A ₹/€ toggle, plus takeaways and contents panels on the other long pages (model, industry, policy).
+- ESG data gaps: SAIL and AM/NS intensity, SBTi status (check the SBTi target dashboard), renewable shares and BRSR Core assurance status.
 - Vercel import (manual, see above).
 - Q4 2026 price on 4 Jan 2027; weekly prices from 2027.
 - India defaults for 7209/7210 equal 7208 (4.280), so product mix only matters via benchmarks (not modelled).
@@ -69,5 +79,6 @@ Last updated: 31 Oct 2026.
 - Mekko origins: only Türkiye, Korea and India flat-steel volumes are published (EUROFER 2025, ~23.1 Mt); the rest is one "Other origins" block. Türkiye uses its bars/rods default as a proxy.
 - Absolutely positioned children (sr-only) inside scroll boxes need a `relative` wrapper or they widen the page on mobile.
 - Logo img errors can fire before hydration; Logo checks `naturalWidth` after mount.
+- ESG figures: corporate Scope 1+2 per tonne of crude steel (BRSR/factsheet) is not the CBAM boundary (direct, per product). The two are kept apart, and the taxonomy rating uses the corporate figure only as a proxy.
 - Do not `pkill -f` with a pattern that also matches your own shell command.
 - Commits: author `Shreshtha <77679539+nightraven4545@users.noreply.github.com>`, no AI co-author trailers.
