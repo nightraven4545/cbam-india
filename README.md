@@ -9,6 +9,7 @@ An engagement-style analysis and interactive model of the **EU Carbon Border Adj
 [![Live site](https://img.shields.io/badge/Live_site-cbam--india.vercel.app-0b1f36?style=for-the-badge&logo=vercel&logoColor=white)](https://cbam-india.vercel.app)
 [![Excel model](https://img.shields.io/badge/Excel_model-download-1d62b5?style=for-the-badge&logo=microsoftexcel&logoColor=white)](https://cbam-india.vercel.app/cbam-india-model.xlsx)
 [![One-page PDF](https://img.shields.io/badge/One--page_PDF-download-1d62b5?style=for-the-badge&logo=adobeacrobatreader&logoColor=white)](https://cbam-india.vercel.app/CBAM-India-one-pager.pdf)
+[![Slide deck PDF](https://img.shields.io/badge/Slide_deck_PDF-download-1d62b5?style=for-the-badge&logo=adobeacrobatreader&logoColor=white)](https://cbam-india.vercel.app/CBAM-India-deck.pdf)
 
 ![Next.js 15](https://img.shields.io/badge/Next.js-15-000?logo=nextdotjs) ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6?logo=typescript&logoColor=white) ![Tests](https://img.shields.io/badge/tests-49_passing-1b8a5a) ![Accessibility](https://img.shields.io/badge/WCAG-AA_(axe--core)-1b8a5a) ![Data](https://img.shields.io/badge/sources-graded_A–E-8a96a3)
 
@@ -30,7 +31,8 @@ It pairs a tested model of the regulation with the exhibits a client would expec
 
 | | |
 |---|---|
-| **Author** | [Shreshtha](https://github.com/nightraven4545) |
+| **Authors** | [Shreshtha](https://github.com/nightraven4545) and [DogInfantry](https://github.com/DogInfantry) (equal contributors) |
+| **Slide deck** | [`CBAM-India-deck.pdf`](public/CBAM-India-deck.pdf): 13-slide board and Ministry readout, 9 November 2026 |
 | **Published** | 31 October 2026 (data as of Q3 2026 CBAM certificate prices) |
 | **Live site** | [cbam-india.vercel.app](https://cbam-india.vercel.app) |
 | **Coverage** | Steel (JSW, Tata Steel, AM/NS India, JSPL, SAIL), aluminium (Vedanta, Hindalco, NALCO), cement (UltraTech, Shree, Dalmia), downstream MSME goods |
@@ -191,4 +193,4 @@ npm run dev
 
 ---
 
-<sub>Prepared by <a href="https://github.com/nightraven4545">Shreshtha</a>, 31 October 2026. Keywords: CBAM India, EU carbon border adjustment mechanism, CBAM cost calculator, CBAM default values India, Indian steel exports to EU, Tata Steel, JSW Steel, AM/NS India, Jindal Steel, SAIL, Vedanta, Hindalco, aluminium, cement, EU ETS, Article 9, CCTS, green steel taxonomy, decarbonisation roadmap.</sub>
+<sub>Prepared by <a href="https://github.com/nightraven4545">Shreshtha</a> and <a href="https://github.com/DogInfantry">DogInfantry</a>, 31 October 2026. Keywords: CBAM India, EU carbon border adjustment mechanism, CBAM cost calculator, CBAM default values India, Indian steel exports to EU, Tata Steel, JSW Steel, AM/NS India, Jindal Steel, SAIL, Vedanta, Hindalco, aluminium, cement, EU ETS, Article 9, CCTS, green steel taxonomy, decarbonisation roadmap.</sub>

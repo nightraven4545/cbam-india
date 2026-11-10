@@ -9,6 +9,10 @@
     "url": "https://github.com/nightraven4545/cbam-india"
   },
   "author": "Shreshtha (https://github.com/nightraven4545)",
+  "contributors": [
+    "Shreshtha (https://github.com/nightraven4545)",
+    "DogInfantry <ankleshrawat5@gmail.com> (https://github.com/DogInfantry)"
+  ],
   "keywords": [
     "cbam",
     "carbon-border-adjustment-mechanism",
