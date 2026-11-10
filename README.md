@@ -32,7 +32,7 @@ It pairs a tested model of the regulation with the exhibits a client would expec
 | | |
 |---|---|
 | **Authors** | [Shreshtha](https://github.com/nightraven4545) and [DogInfantry](https://github.com/DogInfantry) (equal contributors) |
-| **Slide deck** | [`CBAM-India-deck.pdf`](public/CBAM-India-deck.pdf): 13-slide board and Ministry readout, 9 November 2026 |
+| **Slide deck** | [`CBAM-India-deck.pdf`](public/CBAM-India-deck.pdf): 13-slide board and Ministry readout, 9 November 2026 ([preview below](#the-board-deck-verify-first-route-second-price-at-home-third)) |
 | **Published** | 31 October 2026 (data as of Q3 2026 CBAM certificate prices) |
 | **Live site** | [cbam-india.vercel.app](https://cbam-india.vercel.app) |
 | **Coverage** | Steel (JSW, Tata Steel, AM/NS India, JSPL, SAIL), aluminium (Vedanta, Hindalco, NALCO), cement (UltraTech, Shree, Dalmia), downstream MSME goods |
@@ -55,6 +55,49 @@ Print-ready, with a QR code back to the live model.<br><br>
 <a href="https://cbam-india.vercel.app/CBAM-India-one-pager.pdf"><b>Download the PDF →</b></a></td>
 </tr>
 </table>
+
+## The board deck: verify first, route second, price at home third
+
+A 13-slide board and Ministry readout dated 9 November 2026 ([PDF, 0.7 MB](https://cbam-india.vercel.app/CBAM-India-deck.pdf)). It is built from this repository's model and adds the 2026 context: the EU steel quota, falling shipments, and the Article 9 and CCTS calendar. Every slide headline states a finding, and every number ties back to the repo within rounding.
+
+<a href="https://cbam-india.vercel.app/CBAM-India-deck.pdf"><img src="docs/screenshots/deck/deck-cover.jpg" alt="Cover slide of the CBAM India board deck: Verify first, route second, price at home third. €14.7bn CBAM bill for India's five largest steel exporters 2026 to 2034 on EU default values, 66% of it a charge on missing data, €2.8bn left after five moves" width="100%"></a>
+
+<table>
+<tr>
+<td width="50%"><a href="https://cbam-india.vercel.app/CBAM-India-deck.pdf#page=2"><img src="docs/screenshots/deck/deck-executive-summary.png" alt="Executive summary slide: €14.7bn CBAM bill on default values against €4.97bn on verified data, annual bill rising from €326m in 2026 to €856m in 2034, EU margin kept in 2030 by exporter, five moves and decisions this quarter"></a><br><b>Executive summary.</b> Two thirds of a €14.7bn bill is a charge on missing data; five moves cut it to €2.8bn.</td>
+<td width="50%"><a href="https://cbam-india.vercel.app/CBAM-India-deck.pdf#page=3"><img src="docs/screenshots/deck/deck-how-cbam-is-charged.png" alt="How CBAM is charged on one tonne of Tata Steel hot-rolled coil in 2026: €278 on EU default values versus €56 with verified emissions data, a €222 per tonne charge for missing data"></a><br><b>How one tonne is charged.</b> Tata hot-rolled coil pays €278 on defaults and €56 verified: the gap is data, not carbon.</td>
+</tr>
+<tr>
+<td><a href="https://cbam-india.vercel.app/CBAM-India-deck.pdf#page=4"><img src="docs/screenshots/deck/deck-2030-cliff.png" alt="The 2030 CBAM cliff: free allocation falls from 77.5% to 51.5% in 2030 and verified Indian steel pays €210 to €275 a tonne by 2034"></a><br><b>The 2030 cliff.</b> Free allocation drops from 77.5% to 51.5%; verified steel pays €210 to €275 a tonne by 2034.</td>
+<td><a href="https://cbam-india.vercel.app/CBAM-India-deck.pdf#page=7"><img src="docs/screenshots/deck/deck-what-changed-in-2026.png" alt="What changed in 2026: EU safeguard quota for Indian steel cut from 2.79 Mt to 1.94 Mt from 1 July 2026, shipments down 19.9% year on year, and the Article 9, CCTS and CBAM certificate calendar to September 2027"></a><br><b>What changed in 2026.</b> A 1.94 Mt duty-free EU quota now rations Indian steel; margin after CBAM decides which tonnes use it.</td>
+</tr>
+<tr>
+<td><a href="https://cbam-india.vercel.app/CBAM-India-deck.pdf#page=9"><img src="docs/screenshots/deck/deck-value-at-stake.png" alt="Value-at-stake waterfall: verification removes €9.7bn of the €14.7bn CBAM bill; efficiency, scrap, plant routing and an Indian carbon price remove €2.2bn more, leaving €2.8bn"></a><br><b>Value at stake.</b> Verification removes €9.7bn; the other four moves take €2.2bn more.</td>
+<td><a href="https://cbam-india.vercel.app/CBAM-India-deck.pdf#page=10"><img src="docs/screenshots/deck/deck-government-options.png" alt="What India's government should do under CBAM Article 9: an explicit €20 a tonne Indian carbon price keeps €974m in India, the CCTS as designed keeps €49m, and $1.2bn of MSME exports are already in scope"></a><br><b>What government should do.</b> An explicit €20/t price keeps €974m at home; CCTS as designed keeps €49m.</td>
+</tr>
+</table>
+
+<details>
+<summary><b>The storyline in 13 headlines</b> (read the slide titles in order and you have the whole argument)</summary>
+
+1. **Cover.** Verify first, route second, price at home third.
+2. **Executive summary.** Two thirds of a €14.7bn CBAM bill is a charge on missing data; five moves cut it to €2.8bn by 2034.
+3. **How it is charged.** One tonne of Tata hot-rolled coil pays €278 on EU defaults and €56 verified: the gap is data, not carbon.
+4. **The 2030 cliff.** The bill is back-loaded: free allocation falls from 77.5% to 51.5% in 2030, and verified steel pays €210 to €275 a tonne by 2034.
+5. **Who is exposed.** By 2030 AM/NS and Jindal keep 11% and 5% of their EU margin, and SAIL's EU tonnes lose money.
+6. **Against other origins.** Verified, India pays €129/t in 2030 against Korea's €120; on defaults it pays €321/t more and loses to EU mills above €19/tCO₂.
+7. **What changed in 2026.** Since July a 1.94 Mt duty-free quota rations Indian steel; the margin left after CBAM decides which tonnes should use it.
+8. **Which levers pay.** Efficiency pays on its own; scrap and biochar cost €45 to €53 a tonne of CO₂ against an €82 certificate; a renewable PPA cuts no steel CBAM.
+9. **Value at stake.** Verification removes €9.7bn of the €14.7bn; efficiency, scrap, routing and an Indian price take €2.2bn more, leaving €2.8bn.
+10. **What government should do.** An explicit €20 a tonne Indian price keeps €974m at home; CCTS as designed keeps €49m, and $1.2bn of MSME goods is already in scope.
+11. **Roadmap.** Twelve moves, front-loaded before the 2030 cliff: verification, contract clauses and plant routing start in the next 90 days.
+12. **Method.** One formula, nine factor years, eight producers; direct intensity moves the JSW bill most, then price and volume.
+13. **Tie-out.** Every headline number ties to the repo within rounding; the weakest inputs are plant intensities and EU volumes, both grade D.
+
+</details>
+
+### What changed for Indian steel exports to the EU in 2026?
+From 1 July 2026 the EU safeguard quota for Indian steel fell from 2.79 Mt to 1.94 Mt a year (Implementing Regulation (EU) 2026/1457), with a 50% duty above the quota on top of CBAM. Indian steel shipped to the EU fell 19.9% year on year in April to September (FY27). The India–EU FTA, concluded on 27 January 2026, gives no CBAM exemption. CBAM certificate sales open on 1 February 2027, and the first declaration for 2026 imports is due on 30 September 2027.
 
 ## Why it matters now
 
@@ -184,6 +227,7 @@ npm run dev
 - [`/llms.txt`](https://cbam-india.vercel.app/llms.txt) gives a plain-text guide to every page and the key answers, generated from the model.
 - Structured data on every page: schema.org `WebSite` and `Report`, plus `FAQPage` on the summary.
 - Citation metadata is in [`CITATION.cff`](CITATION.cff).
+- Two PDFs carry the analysis offline: the [board deck](https://cbam-india.vercel.app/CBAM-India-deck.pdf) (13 slides, 9 November 2026) and the [one-page summary](https://cbam-india.vercel.app/CBAM-India-one-pager.pdf). Every deck headline is a full-sentence finding, so a slide can be quoted on its own.
 
 ## Caveats
 
@@ -193,4 +237,4 @@ npm run dev
 
 ---
 
-<sub>Prepared by <a href="https://github.com/nightraven4545">Shreshtha</a> and <a href="https://github.com/DogInfantry">DogInfantry</a>, 31 October 2026. Keywords: CBAM India, EU carbon border adjustment mechanism, CBAM cost calculator, CBAM default values India, Indian steel exports to EU, Tata Steel, JSW Steel, AM/NS India, Jindal Steel, SAIL, Vedanta, Hindalco, aluminium, cement, EU ETS, Article 9, CCTS, green steel taxonomy, decarbonisation roadmap.</sub>
+<sub>Prepared by <a href="https://github.com/nightraven4545">Shreshtha</a> and <a href="https://github.com/DogInfantry">DogInfantry</a>, 31 October 2026. Keywords: CBAM India, EU carbon border adjustment mechanism, CBAM cost calculator, CBAM default values India, Indian steel exports to EU, Tata Steel, JSW Steel, AM/NS India, Jindal Steel, SAIL, Vedanta, Hindalco, aluminium, cement, EU ETS, Article 9, CCTS, green steel taxonomy, EU steel safeguard quota India, CBAM board presentation, decarbonisation roadmap.</sub>
